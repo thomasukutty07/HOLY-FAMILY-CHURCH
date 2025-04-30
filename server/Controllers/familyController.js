@@ -44,7 +44,7 @@ export const createFamily = async (req, res) => {
     }
 }
 
-export const fetchAllfFamilyNames = async (req, res) => {
+export const fetchAllFamilyNames = async (req, res) => {
     try {
         const allFamilyNames = await Family.find({}, "familyName")
         if (allFamilyNames) {
@@ -55,6 +55,23 @@ export const fetchAllfFamilyNames = async (req, res) => {
 
     }
 }
+export const fetchFamiliesByGroup = async (req, res) => {
+    try {
+
+        const { groupId } = req.body
+        const families = await Family.find({ groupId }).populate("groupId")
+        if (!families) {
+            return res.status(500).json({ success: false, message: "No families in the group" })
+        }
+        return res.status(200).json({ success: true, families, })
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Failed to fetch family names" })
+
+    }
+}
+
+
 export const updateFamily = async (req, res) => {
     try {
 

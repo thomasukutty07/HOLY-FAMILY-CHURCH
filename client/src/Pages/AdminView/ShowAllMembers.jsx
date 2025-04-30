@@ -13,7 +13,7 @@ import {
 import { fetchAllFamilyNames } from "@/Store/Family/familySlice";
 import { fetchAllGroupNames } from "@/Store/Group/groupSlice";
 import { Loader2 } from "lucide-react";
-const MemberDetails = () => {
+const ShowAllMembers = () => {
   const { users } = useSelector((state) => state.user);
   const { familyNames, familyLoading } = useSelector((state) => state.family);
   const { groupNames, groupLoading } = useSelector((state) => state.group);
@@ -120,4 +120,4 @@ const MemberDetails = () => {
   );
 };
 
-export default MemberDetails;
+export default ShowAllMembers;

@@ -15,9 +15,9 @@ import Login from "./Pages/AdminView/Login";
 import LoginLayout from "./components/Layout/LoginLayout";
 import PageNotFound from "./components/Common/PageNotFound";
 import { checkAuth } from "./Store/User/authSlice";
-import MemberDetails from "./Pages/AdminView/MemberDetails";
-import FamilyDetails from "./Pages/AdminView/FamilyDetails";
-import GroupDetails from "./Pages/AdminView/GroupDetails";
+import ShowAllGroups from "./Pages/AdminView/ShowAllGroups";
+import ShowAllMembers from "./Pages/AdminView/ShowAllMembers";
+import ShowAllFamilies from "./Pages/AdminView/ShowAllFamilies";
 
 const App = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -65,9 +65,9 @@ const App = () => {
           <Route path="add-user" element={<AddUser />} />
           <Route path="create-family" element={<CreateFamily />} />
           <Route path="create-group" element={<CreateGroup />} />
-          <Route path="users" element={<MemberDetails />} />
-          <Route path="families" element={<FamilyDetails />} />
-          <Route path="groups" element={<GroupDetails />} />
+          <Route path="users" element={<ShowAllMembers />} />
+          <Route path="families" element={<ShowAllFamilies />} />
+          <Route path="groups" element={<ShowAllGroups />} />
         </Route>
         <Route
           path="/auth"

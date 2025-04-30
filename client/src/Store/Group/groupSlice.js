@@ -3,21 +3,21 @@ import axios from "axios";
 
 const initialState = {
     groupNames: [],
-    groupLoading: false
+    groupLoading: false,
 }
-
-export const fetchAllGroupNames = createAsyncThunk("groupNames", async (_, { rejectWithValue }) => {
+export const fetchAllGroupNames = createAsyncThunk("group/fetch-all", async (_, { rejectWithValue }) => {
     try {
-        const response = await axios.get("http://localhost:4000/church/group/fetch-groups")
+        const response = await axios.get("http://localhost:4000/church/group/groups")
         return response?.data
     } catch (error) {
         console.error(error.message)
         return rejectWithValue(error?.response?.data || { message: "Something went wrong" })
     }
 })
-export const createGroup = createAsyncThunk("createGroup", async (data, { rejectWithValue }) => {
+
+export const createGroup = createAsyncThunk("group/create", async (data, { rejectWithValue }) => {
     try {
-        const response = await axios.post("http://localhost:4000/church/group/create-group", data, {
+        const response = await axios.post("http://localhost:4000/church/group/groups", data, {
             headers: {
                 "Content-Type": "application/json"
             }
@@ -28,9 +28,9 @@ export const createGroup = createAsyncThunk("createGroup", async (data, { reject
         return rejectWithValue(error?.response?.data || { message: "Something went wrong" })
     }
 })
-export const uploadGroupImage = createAsyncThunk("createGroup", async (data, { rejectWithValue }) => {
+export const uploadGroupImage = createAsyncThunk("group/upload-image", async (data, { rejectWithValue }) => {
     try {
-        const response = await axios.post("http://localhost:4000/church/group/upload-group-image", data)
+        const response = await axios.post("http://localhost:4000/church/group/groups/upload-image", data)
         return response?.data
     } catch (error) {
         console.error(error.message)
@@ -38,26 +38,25 @@ export const uploadGroupImage = createAsyncThunk("createGroup", async (data, { r
     }
 })
 
-
 const groupSlice = createSlice({
     name: "group",
     initialState,
     reducers: {},
     extraReducers: (builder) => {
-        builder.addCase(fetchAllGroupNames.pending, (state) => {
-            state.groupNames = null
-            state.groupLoading = true
-        })
-        builder.addCase(fetchAllGroupNames.fulfilled, (state, action) => {
-            state.groupNames = action?.payload?.success ? action?.payload?.data : null
-            state.groupLoading = false
-        })
-        builder.addCase(fetchAllGroupNames.rejected, (state) => {
-            state.groupNames = null
-            state.groupLoading = false
-        })
+        builder
+            .addCase(fetchAllGroupNames.pending, (state) => {
+                state.groupLoading = true
+                state.groupNames = []
+            })
+            .addCase(fetchAllGroupNames.fulfilled, (state, action) => {
+                state.groupNames = action?.payload?.success ? action?.payload?.data : []
+                state.groupLoading = false
+            })
+            .addCase(fetchAllGroupNames.rejected, (state, action) => {
+                state.groupLoading = false
+                state.groupNames = []
+            })
     }
-
 })
 
 export default groupSlice.reducer

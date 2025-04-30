@@ -83,7 +83,7 @@ const CreateGroup = () => {
     </div>
   ) : (
     <div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between ">
         <h1 className="text-3xl mb-5 font-benzin">Create Group</h1>
         {groupNames && groupNames.length > 0 && (
           <Button>

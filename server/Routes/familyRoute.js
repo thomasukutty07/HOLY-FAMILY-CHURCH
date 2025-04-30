@@ -1,12 +1,17 @@
 import express from 'express'
-import { createFamily, fetchAllfFamilyNames, uploadFamilyImage } from '../Controllers/familyController.js'
+import {
+    createFamily,
+    fetchAllFamilyNames,
+    fetchFamiliesByGroup,
+    uploadFamilyImage
+} from '../Controllers/familyController.js'
+
 import { upload } from '../Middleware/uploadMiddleware.js'
 
 const router = express.Router()
-
-
-router.post("/create", createFamily)
-router.post("/upload-family-image", upload.single("image"), uploadFamilyImage)
-router.get("/family-names", fetchAllfFamilyNames)
+router.post("/families", createFamily)
+router.post("/families/upload-image", upload.single("image"), uploadFamilyImage)
+router.get("/families/names", fetchAllFamilyNames)
+router.get("/families/names/grouped", fetchFamiliesByGroup)
 
 export default router
