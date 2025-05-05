@@ -1,90 +1,27 @@
-import { Group, House, ShieldUser, User } from "lucide-react";
-import React, { useState } from "react";
+import { Grid, Home, Menu, Shield, User, LogOut } from "lucide-react";
+import { useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
-import { Button } from "../ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTrigger,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "@/Store/User/authSlice";
 import { toast } from "sonner";
 
-const buttonControls = [
-  { id: 1, title: "Dashboard", path: "/admin/dashboard", icon: ShieldUser },
-  { id: 2, title: "Group", path: "/admin/create-group", icon: Group },
-  { id: 3, title: "Family", path: "/admin/create-family", icon: House },
-  { id: 4, title: "User", path: "/admin/add-user", icon: User },
-];
-
-function SideBar() {
+const AdminLayout = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
-
-  return (
-    <>
-      {/*  Sidebar for large screens */}
-      <div className="border-r h-full sm:block hidden sm:h-screen pt-10 px-4 w-full sm:w-[250px]">
-        <div className="flex items-center gap-2">
-          <ShieldUser size={40} />
-          <Link to={"/admin/dashboard"} className="font-europa text-3xl">
-            Admin Panel
-          </Link>
-        </div>
-        <div className="flex flex-col items-start gap-4 mt-6">
-          {buttonControls.map((item) => (
-            <Button
-              variant="ghost"
-              className="text-[20px] font-compacta justify-start gap-2 w-full"
-              onClick={() => navigate(item.path)}
-              key={item.id}
-            >
-              <item.icon className="w-5 h-5" /> {item.title}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      {/*  Sidebar drawer for small screens */}
-      <div className="block sm:hidden">
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
-            <Button className="m-4">Menu</Button>
-          </SheetTrigger>
-          <SheetContent side="left">
-            <SheetHeader>
-              <SheetTitle className="flex text-2xl font-benzin gap-2 items-center">
-                <ShieldUser size={40} /> Admin Panel
-              </SheetTitle>
-            </SheetHeader>
-            <div className="flex flex-col items-start gap-4 ">
-              {buttonControls.map((item) => (
-                <Button
-                  variant="ghost"
-                  className="text-[20px] font-compacta justify-start gap-2 w-full"
-                  onClick={() => {
-                    navigate(item.path);
-                    setIsOpen(false);
-                  }}
-                  key={item.id}
-                >
-                  <item.icon className="w-5 h-5" /> {item.title}
-                </Button>
-              ))}
-              <Button className="ml-2">Logout</Button>
-            </div>
-          </SheetContent>
-        </Sheet>
-      </div>
-    </>
-  );
-}
-
-const AdminLayout = () => {
   const dispatch = useDispatch();
+
+  const navigationItems = [
+    { id: 1, title: "Dashboard", path: "/admin/dashboard", icon: Shield },
+    { id: 2, title: "Create Group", path: "/admin/create-group", icon: Grid },
+    { id: 3, title: "Create Family", path: "/admin/create-family", icon: Home },
+    { id: 4, title: "Add Member", path: "/admin/add-member", icon: User },
+  ];
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    setIsOpen(false);
+  };
+
   function handleLogout() {
     dispatch(logoutUser()).then((data) => {
       console.log(data);
@@ -92,23 +29,114 @@ const AdminLayout = () => {
         toast.success(data?.payload?.message);
       }
     });
-  }
+  };
+
   return (
-    <div className="flex flex-col sm:flex-row min-h-screen ">
-      {/* Sidebar */}
-      <div className="sm:w-[250px] w-full">
-        <SideBar />
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar - Desktop */}
+      <div className="hidden lg:flex w-64 flex-col bg-white border-r shadow-sm">
+        <div className="flex items-center gap-2 p-6 border-b">
+          <Shield className="h-6 w-6 text-indigo-600" />
+          <span className="font-bold text-xl">Admin Panel</span>
+        </div>
+        
+        <div className="flex flex-col flex-1 p-4 space-y-1">
+          {navigationItems.map((item) => (
+            <button
+              key={item.id}
+                              className={`flex items-center gap-2 px-3 py-2 rounded-md w-full text-left ${
+                window.location.pathname === item.path 
+                  ? "bg-indigo-100 text-indigo-700" 
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+              onClick={() => handleNavigation(item.path)}
+            >
+              <item.icon className="h-5 w-5" />
+              <span>{item.title}</span>
+            </button>
+          ))}
+        </div>
+        
+        <div className="p-4 border-t">
+          <button 
+            className="flex items-center gap-2 px-3 py-2 rounded-md w-full text-left text-red-600 hover:bg-red-50"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-5 w-5" />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
 
-      {/* Right side (Header + Content) */}
-      <div className="flex-1 flex flex-col">
-        {/*  Logout always top-right */}
-        <div className="sm:flex hidden bg-white sm:justify-end p-4 border-b w-full sticky top-0 z-10">
-          <Button onClick={handleLogout}>Logout</Button>
+      {/* Mobile Header & Sidebar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-10">
+        <div className="flex items-center justify-between border-b px-4 py-3 bg-white">
+          <div className="flex items-center gap-2">
+            <button 
+              className="p-1 rounded-md hover:bg-gray-100"
+              onClick={() => setIsOpen(true)}
+            >
+              <Menu className="h-5 w-5" />
+            </button>
+            <div className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-indigo-600" />
+              <span className="font-bold">Admin Panel</span>
+            </div>
+          </div>
+          <button 
+            className="flex items-center gap-1 px-2 py-1 text-sm rounded-md border border-red-200 text-red-600 hover:bg-red-50"
+            onClick={handleLogout}
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </button>
         </div>
+      </div>
 
-        {/* Main content */}
-        <div className="flex-1 p-4 overflow-auto">
+      {/* Mobile sidebar */}
+      {isOpen && (
+        <div className="lg:hidden fixed inset-0 z-20">
+          <div 
+            className="absolute inset-0 bg-black bg-opacity-50"
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute top-0 left-0 h-full w-64 bg-white shadow-lg">
+            <div className="flex items-center justify-between p-4 border-b">
+              <div className="flex items-center gap-2">
+                <Shield className="h-6 w-6 text-indigo-600" />
+                <span className="font-bold text-xl">Admin Panel</span>
+              </div>
+              <button 
+                className="p-1 rounded-md hover:bg-gray-100"
+                onClick={() => setIsOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className="p-4">
+              {navigationItems.map((item) => (
+                <button
+                  key={item.id}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-md w-full text-left mb-1 ${
+                    window.location.pathname === item.path 
+                      ? "bg-indigo-100 text-indigo-700" 
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                  onClick={() => handleNavigation(item.path)}
+                >
+                  <item.icon className="h-5 w-5" />
+                  <span>{item.title}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto pt-16 lg:pt-0">
+        <div className="p-6">
+          {/* This is where the child route components will render */}
           <Outlet />
         </div>
       </div>

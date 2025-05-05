@@ -1,11 +1,39 @@
 import mongoose from "mongoose";
 
 const familySchema = new mongoose.Schema({
-    familyName: { type: String, required: true },
-    imageUrl: { type: String },
-    publicId: { type: String },
-    contactNo: { type: String, required: true },
-    groupId: { type: mongoose.Schema.ObjectId, ref: "Group", default: null }
-})
+    imageUrl: {
+        type: String,
+        required: false,
+    },
+    familyName: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    headOfFamily: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    contactNo: {
+        type: String,
+        required: true,
+        trim: true,
+    },
+    address: {
+        type: String,
+        required: true,
+        minlength: 10,
+        maxlength: 500,
+        trim: true,
+    },
+    group: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Group",
+        required: true,
+    },
+}, {
+    timestamps: true,
+});
 
-export default mongoose.model("Family", familySchema, "Families")
+export default mongoose.model("Family", familySchema);

@@ -25,13 +25,10 @@ export const createFamily = createAsyncThunk("family/create", async (data, { rej
     }
 })
 
-export const fetchAllFamilyNames = createAsyncThunk("family/fetch-all", async (_, { rejectWithValue }) => {
+export const deleteFamilyImage = createAsyncThunk("family/deleteFamilyImage", async (id, { rejectWithValue }) => {
     try {
-        const response = await axios.get('http://localhost:4000/church/family/families/names', {
-            headers: {
-                "Content-Type": "application/json"
-            }
-        })
+        const imageId = id.replace(/^church\//, "");
+        const response = await axios.delete(`http://localhost:4000/church/family/delete-image/${imageId}`,)
         return response?.data
     } catch (error) {
         console.error(error.message)
@@ -41,6 +38,7 @@ export const fetchAllFamilyNames = createAsyncThunk("family/fetch-all", async (_
 
 const initialState = {
     familyNames: [],
+    groupedFamilyNames: [],
     familyLoading: false,
 }
 
@@ -49,18 +47,6 @@ const familySlice = createSlice({
     initialState,
     reducers: {},
     extraReducers: (builder) => {
-        builder
-            .addCase(fetchAllFamilyNames.pending, (state) => {
-                state.familyLoading = true
-            })
-            .addCase(fetchAllFamilyNames.fulfilled, (state, action) => {
-                state.familyNames = action.payload?.familyNames
-                state.familyLoading = false
-            })
-            .addCase(fetchAllFamilyNames.rejected, (state, action) => {
-                state.familyNames = []
-                state.familyLoading = false
-            })
     }
 })
 

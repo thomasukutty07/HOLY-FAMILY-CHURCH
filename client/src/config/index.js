@@ -3,8 +3,9 @@ import person2 from '../assets/person2.jpeg';
 import person3 from '../assets/person3.jpeg';
 import person4 from '../assets/person4.webp';
 import marpapa from '../assets/marpapa.jpg';
+import familyImage from '../assets/family.png'
 
-export const images = { holy_family, person2, person4, person3, marpapa };
+export const images = { holy_family, person2, person4, person3, marpapa, familyImage };
 
 export const headerItems = [
   { name: "Home", path: "/" },
@@ -55,6 +56,9 @@ export const addMemberFormControls = [
     componentType: "select",
     options: [
       { id: "member", label: "Member" },
+      { id: "vicar", label: "Vicar" },
+      { id: "sister", label: "Sister" },
+      { id: "mother", label: "Mother" },
       { id: "teacher", label: "Teacher" },
       { id: "coordinator", label: "Coordinator" },
       { id: "group-leader", label: "Group Leader" },
@@ -132,7 +136,7 @@ export const addMemberFormControls = [
     ]
   },
   {
-    name: "groupId",
+    name: "group",
     label: "Group Name",
     type: "dropdown",
     componentType: "select",
@@ -147,31 +151,46 @@ export const addFamilyFormControls = [
     label: "Family Image",
     type: "file",
     componentType: "input",
-    placeholder: "Upload Image"
-
-  }, {
+    placeholder: "Upload Family Image"
+  },
+  {
     name: "familyName",
     label: "Family Name",
     type: "text",
     componentType: "input",
-    placeholder: "Family Name"
+    placeholder: "Enter Family Name"
+  },
+  {
+    name: "headOfFamily",
+    label: "Family Head",
+    type: "text",
+    componentType: "input",
+    placeholder: "Enter Family Head's Name"
   },
   {
     name: "contactNo",
     label: "Phone Number",
-    type: "text",
+    type: "tel",
     componentType: "input",
-    placeholder: "Phone"
+    placeholder: "Enter Phone Number"
   },
   {
-    name: "groupId",
+    name: "group",
     label: "Group Name",
     type: "dropdown",
     componentType: "select",
     options: [
     ]
   },
+  {
+    name: "address",
+    label: "Address",
+    type: "text",
+    componentType: "textarea",
+    placeholder: "Enter Full Address"
+  },
 ];
+
 
 export const addGroupFormControls = [
   {
@@ -202,5 +221,12 @@ export const addGroupFormControls = [
     type: "text",
     componentType: "input",
     placeholder: "Secretary Name"
+  },
+  {
+    name: "location",
+    label: "Location",
+    type: "text",
+    componentType: "input",
+    placeholder: "Location"
   },
 ]

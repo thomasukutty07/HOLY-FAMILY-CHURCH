@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import { connectDb } from './Database/db.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import userRouter from '../server/Routes/userRoutes.js';
+import memberRouter from '../server/Routes/memberRoute.js';
 import authRouter from '../server/Routes/authRoutes.js';
 import familyRouter from '../server/Routes/familyRoute.js';
 import groupRouter from '../server/Routes/groupRoute.js';
@@ -23,10 +23,10 @@ app.use(cors({
 
 app.use(express.json());
 app.use(cookieParser());
-app.use("/church/admin", userRouter);
+app.use("/church/admin", memberRouter);
 app.use("/church/auth", authRouter);
 app.use("/church/family", familyRouter);
-app.use("/church/group", groupRouter);
+app.use("/church/groups", groupRouter);
 
 // Start server
 function startServer() {

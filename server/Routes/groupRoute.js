@@ -1,7 +1,9 @@
 import express from 'express'
 import {
     createGroup,
-    fetchAllGroupName,
+    deleteGroup,
+    deleteGroupImage,
+    fetchGroupsWithFamilies,
     uploadGroupImage
 } from '../Controllers/groupController.js'
 
@@ -9,8 +11,10 @@ import { upload } from '../Middleware/uploadMiddleware.js'
 
 const router = express.Router()
 
-router.post("/groups", createGroup)
-router.get("/groups", fetchAllGroupName)
-router.post("/groups/upload-image", upload.single("image"), uploadGroupImage)
+router.post("/", createGroup)
+router.post("/upload-image", upload.single("image"), uploadGroupImage)
+router.delete('/delete/:groupId', deleteGroup)
+router.delete('/delete-image/:publicId', deleteGroupImage)
+router.get("/names/grouped/", fetchGroupsWithFamilies)
 
 export default router

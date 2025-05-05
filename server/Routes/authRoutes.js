@@ -4,6 +4,8 @@ import { authMiddleware } from "../Middleware/authMiddleware.js"
 import { loginUser, logoutUser, registerUser } from "../Controllers/authController.js"
 
 const router = express.Router()
+
+
 router.post('/login', loginUser)
 router.post('/register', registerUser)
 router.post('/logout', logoutUser)

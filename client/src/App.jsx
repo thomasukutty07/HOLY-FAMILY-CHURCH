@@ -5,22 +5,22 @@ import ChurchLayout from "./components/Layout/ChurchLayout";
 import Leaders from "./Pages/ClientView/Leaders";
 import AdminLayout from "./components/Layout/AdminLayout";
 import DashBoard from "./Pages/AdminView/DashBoard";
-import AddUser from "./Pages/AdminView/AddUser";
-import CreateFamily from "./Pages/AdminView/CreateFamily";
+import AddMember from "./Pages/AdminView/Member/AddMember";
+import CreateFamily from "./Pages/AdminView/Family/CreateFamily";
 import CheckAuth from "./CheckAuth";
-import CreateGroup from "./Pages/AdminView/CreateGroup";
+import CreateGroup from "./Pages/AdminView/Group/CreateGroup";
 import { Toaster } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import Login from "./Pages/AdminView/Login";
 import LoginLayout from "./components/Layout/LoginLayout";
 import PageNotFound from "./components/Common/PageNotFound";
 import { checkAuth } from "./Store/User/authSlice";
-import ShowAllGroups from "./Pages/AdminView/ShowAllGroups";
-import ShowAllMembers from "./Pages/AdminView/ShowAllMembers";
-import ShowAllFamilies from "./Pages/AdminView/ShowAllFamilies";
-
+import ShowAllFamilies from "./Pages/AdminView/Family/ShowAllFamilies";
+import ShowAllMembers from "./Pages/AdminView/Member/ShowAllMembers";
+import ShowAllGroups from "./Pages/AdminView/Group/ShowAllGroups";
 const App = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { familyNames, groupNames,groupData } = useSelector((state) => state.group);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   useEffect(() => {
@@ -62,10 +62,10 @@ const App = () => {
           }
         >
           <Route path="dashboard" element={<DashBoard />} />
-          <Route path="add-user" element={<AddUser />} />
+          <Route path="add-member" element={<AddMember />} />
           <Route path="create-family" element={<CreateFamily />} />
           <Route path="create-group" element={<CreateGroup />} />
-          <Route path="users" element={<ShowAllMembers />} />
+          <Route path="members" element={<ShowAllMembers />} />
           <Route path="families" element={<ShowAllFamilies />} />
           <Route path="groups" element={<ShowAllGroups />} />
         </Route>
