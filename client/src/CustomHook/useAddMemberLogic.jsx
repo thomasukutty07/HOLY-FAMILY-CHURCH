@@ -1,7 +1,6 @@
 // hooks/useAddMemberLogic.js
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useLocation, useNavigate } from "react-router-dom"; // React Router imports
 import {
   createMember,
   deleteMemberImage,
@@ -10,7 +9,6 @@ import {
 } from "@/Store/User/memberSlice";
 import { toast } from "sonner";
 import { addMemberFormControls } from "@/config";
-import { fetchFamilyByGroupName } from "@/Store/Group/groupSlice";
 
 const initialFormData = {
   imageUrl: "",
@@ -24,15 +22,14 @@ const initialFormData = {
   marriageDate: "",
   isActive: "",
   dateOfDeath: "",
-  familyId: "",
+  family: "",
   group: "",
 };
 
 export const useAddMemberLogic = () => {
-  const { familyNames, groupNames, loading } = useSelector(
-    (state) => state.group
-  );
   const { members, memberLoading } = useSelector((state) => state.member);
+  const { familyNames, familyLoading } = useSelector((state) => state.family);
+  const { groupNames, groupLoading } = useSelector((state) => state.group);
   const dispatch = useDispatch();
 
   const [formData, setFormData] = useState(initialFormData);
@@ -87,10 +84,42 @@ export const useAddMemberLogic = () => {
     }
   }, [publicId, dispatch, resetImageState]);
 
+  // Check the form
+  const getRequiredFields = (formData) => {
+    const defaultOptionalFields = ["imageUrl", "marriageDate", "dateOfDeath"];
+    const exemptRoles = ["vicar", "sister", "mother"];
+    const excludeForExempt = ["group", "family", "marriageDate", "married"];
+
+    const role = formData.role;
+    const allFields = Object.keys(formData);
+    let required = allFields.filter(
+      (key) => !defaultOptionalFields.includes(key)
+    );
+    if (exemptRoles.includes(role)) {
+      required = required.filter((key) => !excludeForExempt.includes(key));
+    }
+    if (!formData.imageUrl) {
+      required = required.filter((key) => key !== "publicId");
+    }
+
+    return required;
+  };
+
   // Form submission logic
   const handleSubmit = useCallback(
     async (event) => {
       event.preventDefault();
+      const required = getRequiredFields(formData);
+      const allRequiredFields = required.every(
+        (key) =>
+          formData[key] !== "" &&
+          formData[key] !== null &&
+          formData[key] !== undefined
+      );
+
+      if (!allRequiredFields) {
+        return toast.error("Fields can't be empty.");
+      }
 
       try {
         const formToSubmit = new FormData();
@@ -129,7 +158,7 @@ export const useAddMemberLogic = () => {
 
   // Update form controls with dynamic options
   const updatedFormDataControls = addMemberFormControls.map((field) => {
-    if (field.name === "familyId") {
+    if (field.name === "family") {
       return {
         ...field,
         options:
@@ -184,7 +213,6 @@ export const useAddMemberLogic = () => {
   // Fetch initial data
   useEffect(() => {
     dispatch(fetchAllMembers());
-    dispatch(fetchFamilyByGroupName());
   }, [dispatch]);
 
   // Handle image upload
@@ -228,7 +256,8 @@ export const useAddMemberLogic = () => {
     setFile,
     updatedFormDataControls,
     memberLoading,
-    loading,
+    familyLoading,
+    groupLoading,
     members,
     handleDeleteImage,
     selectedFileName,

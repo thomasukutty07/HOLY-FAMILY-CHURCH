@@ -1,23 +1,23 @@
-import { images } from "@/config";
-import { fetchFamilyByGroupName } from "@/Store/Group/groupSlice";
-import {
-  MoreHorizontal,
-  Users,
-  Clock,
-  MapPin,
-  ChevronRight,
-} from "lucide-react";
+import { fetchAllGroupNames } from "@/Store/Group/groupSlice";
+import { Users, Clock, MapPin, ChevronRight, Loader2 } from "lucide-react";
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-
+import FamilyDetails from "./FamilyDetails";
+import { fetchFamilyWithMembers } from "@/Store/User/memberSlice";
+import { fetchAllFamily } from "@/Store/Family/familySlice";
+import { useNavigate } from "react-router-dom";
 const ShowAllFamilies = () => {
-  const { familyNames } = useSelector((state) => state.family);
+  const { familyNames, familyLoading } = useSelector((state) => state.family);
+  const { groupedFamilyMembers } = useSelector((state) => state.member);
   const dispatch = useDispatch();
-  const [openMenuId, setOpenMenuId] = useState(null);
+  const [familySelected, setFamilySelected] = useState(false);
+  const [currentSelectedFamily, setCurrentSelectedFamily] = useState(null);
+  const navigate = useNavigate();
   const menuRef = useRef(null);
 
   useEffect(() => {
-    dispatch(fetchFamilyByGroupName);
+    dispatch(fetchAllFamily());
+    dispatch(fetchAllGroupNames());
   }, [dispatch]);
 
   useEffect(() => {
@@ -30,57 +30,31 @@ const ShowAllFamilies = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuRef]);
 
-  const toggleMenu = (id, e) => {
-    e.stopPropagation();
-    setOpenMenuId((prev) => (prev === id ? null : id));
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return `${String(date.getDate()).padStart(2, "0")}-${String(
+      date.getMonth() + 1
+    ).padStart(2, "0")}-${date.getFullYear()}`;
   };
 
-  const handleEdit = (id, e) => {
-    e.stopPropagation();
-    console.log("Edit", id);
-    setOpenMenuId(null);
-  };
+  console.log("groupedfamily", groupedFamilyMembers);
 
-  const handleDelete = (id, e) => {
-    e.stopPropagation();
-    console.log("Delete", id);
-    setOpenMenuId(null);
-  };
+  if (familyLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-105px)] bg-gray-50">
+        <Loader2 className="animate-spin w-12 h-12 text-indigo-600 mb-4" />
+        <p className="text-gray-600 font-medium">Loading...</p>
+      </div>
+    );
+  }
 
-  // Mock data for location and date display
-  const getLocationText = (index) => {
-    const locations = [
-      "New York",
-      "Los Angeles",
-      "Chicago",
-      "Miami",
-      "Seattle",
-      "Boston",
-    ];
-    return locations[index % locations.length];
-  };
-
-  const getFormattedDate = (index) => {
-    const months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ];
-    const randomMonth = months[index % months.length];
-    const randomDay = (index % 28) + 1;
-    return `${randomMonth} ${randomDay}, 2023`;
-  };
-
-  return (
+  return familySelected ? (
+    <FamilyDetails
+      family={currentSelectedFamily}
+      members={groupedFamilyMembers}
+      onBack={setFamilySelected}
+    />
+  ) : (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-6xl mx-auto">
         {/* Header Section */}
@@ -94,7 +68,12 @@ const ShowAllFamilies = () => {
               <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors duration-200">
                 Filter
               </button>
-              <button className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors duration-200">
+              <button
+                onClick={() => {
+                  navigate("/admin/create-family");
+                }}
+                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors duration-200"
+              >
                 Add Family
               </button>
             </div>
@@ -105,8 +84,15 @@ const ShowAllFamilies = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {familyNames?.map((family, index) => (
             <div
+              onClick={() => {
+                setFamilySelected(true);
+                dispatch(fetchFamilyWithMembers(family._id)).then((data) => {
+                  console.log(data);
+                });
+                setCurrentSelectedFamily(family);
+              }}
               key={family._id}
-              className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100"
+              className="bg-white  rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-100"
             >
               {/* Color Banner - different color for each card */}
               <div
@@ -136,39 +122,9 @@ const ShowAllFamilies = () => {
                       </h2>
                       <div className="flex items-center text-sm text-gray-500">
                         <Users size={14} className="mr-1" />
-                        <span>{(index % 10) + 2} members</span>
+                        <span>{family.totalMembers} members</span>
                       </div>
                     </div>
-                  </div>
-
-                  {/* Menu Button */}
-                  <div className="relative">
-                    <button
-                      onClick={(e) => toggleMenu(family._id, e)}
-                      className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors"
-                    >
-                      <MoreHorizontal size={18} />
-                    </button>
-
-                    {openMenuId === family._id && (
-                      <div
-                        ref={menuRef}
-                        className="absolute right-0 mt-1 w-48 bg-white shadow-lg rounded-lg overflow-hidden z-10 border border-gray-200"
-                      >
-                        <button
-                          onClick={(e) => handleEdit(family._id, e)}
-                          className="w-full text-left px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                        >
-                          Edit Family
-                        </button>
-                        <button
-                          onClick={(e) => handleDelete(family._id, e)}
-                          className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-colors"
-                        >
-                          Delete Family
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
 
@@ -176,11 +132,11 @@ const ShowAllFamilies = () => {
                 <div className="space-y-3 mb-6">
                   <div className="flex items-center text-sm text-gray-500">
                     <Clock size={16} className="mr-2" />
-                    <span>Created on {getFormattedDate(index)}</span>
+                    <span>Created on {formatDate(family.createdAt)}</span>
                   </div>
                   <div className="flex items-center text-sm text-gray-500">
                     <MapPin size={16} className="mr-2" />
-                    <span>{getLocationText(index)}</span>
+                    <span>{family.location}</span>
                   </div>
                 </div>
 
@@ -208,7 +164,14 @@ const ShowAllFamilies = () => {
                 </div>
 
                 {/* Action Button */}
-                <button className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center font-medium text-sm transition-colors duration-200">
+                <button
+                  onClick={() => {
+                    setFamilySelected(true);
+                    dispatch(fetchFamilyWithMembers(family._id));
+                    setCurrentSelectedFamily(family);
+                  }}
+                  className="w-full py-2 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg flex items-center justify-center font-medium text-sm transition-colors duration-200"
+                >
                   <span>View Family</span>
                   <ChevronRight size={16} className="ml-1" />
                 </button>
@@ -217,7 +180,12 @@ const ShowAllFamilies = () => {
           ))}
 
           {/* Add New Family Card */}
-          <div className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 border-dashed flex flex-col items-center justify-center p-10 cursor-pointer hover:bg-gray-50">
+          <div
+            onClick={() => {
+              navigate("/admin/create-family");
+            }}
+            className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 border-dashed flex flex-col items-center justify-center p-10 cursor-pointer hover:bg-gray-50"
+          >
             <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-4">
               <svg
                 width="24"

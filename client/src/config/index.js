@@ -128,7 +128,7 @@ export const addMemberFormControls = [
     componentType: "date"
   },
   {
-    name: "familyId",
+    name: "family",
     label: "Family Name",
     type: "dropdown",
     componentType: "select",
@@ -183,6 +183,13 @@ export const addFamilyFormControls = [
     ]
   },
   {
+    name: "location",
+    label: "Location",
+    type: "text",
+    componentType: "input",
+    placeholder: "Location"
+  },
+  {
     name: "address",
     label: "Address",
     type: "text",
@@ -230,3 +237,4 @@ export const addGroupFormControls = [
     placeholder: "Location"
   },
 ]
+

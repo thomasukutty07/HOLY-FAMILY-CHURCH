@@ -51,28 +51,21 @@ export const deleteGroup = async (req, res) => {
         if (!group) {
             return res.status(404).json({ success: false, message: "Group not found" });
         }
+
         if (group.publicId) {
             await cloudinary.uploader.destroy(group.publicId);
         }
-        await Family.deleteMany({ group });
-        await Member.deleteMany({ group });
+
+        await Family.deleteMany({ group: group._id });
+        await Member.deleteMany({ group: group._id });
         await Group.findByIdAndDelete(groupId);
 
-        return res.status(200).json({ success: true, message: "Group deleted successfully along with related Family and Member data" });
+        return res.status(200).json({ success: true, message: "Group deleted successfully" });
 
     } catch (error) {
         return res.status(500).json({ success: false, message: "Error while deleting group" });
     }
 };
-
-export const fetchAllGroup = async (req, res) => {
-    try {
-
-    } catch (error) {
-        return res.status(500).json({ success: false, message: "Error while fetching groups" })
-    }
-}
-
 export const deleteGroupImage = async (req, res) => {
     try {
         const { publicId } = req.params
@@ -88,33 +81,26 @@ export const deleteGroupImage = async (req, res) => {
 
     }
 }
-export const fetchGroupsWithFamilies = async (req, res) => {
+export const fetchAllGroups = async (req, res) => {
     try {
-        const groups = await Group.aggregate([
-            {
-                $lookup: {
-                    from: "families",
-                    localField: "_id",
-                    foreignField: "group",
-                    as: "families"
-                }
-            },
-            {
-                $addFields: {
-                    totalFamilies: { $size: "$families" }
-                }
-            }
-        ]);
+        const groups = await Group.find({})
+        if (groups.length === 0) {
+            return res.status(404).json({ success: false, message: "No groups found" })
+        }
 
-        return res.status(200).json({ success: true, data: groups });
+        const groupWithFamilyCount = await Promise.all(
+            groups.map(async (group) => {
+                const familyCount = await Family.countDocuments({ group: group._id })
+                return {
+                    ...group.toObject(),
+                    totalFamilies: familyCount
+                }
+            })
+        )
+        return res.status(200).json({ success: true, groups: groupWithFamilyCount })
 
     } catch (error) {
-        console.error("Error fetching groups with families:", error);
-        return res.status(500).json({
-            success: false,
-            message: "Failed to fetch group data",
-            error: error.message
-        });
+        return res.status(500).json({ success: false, message: "Error while fetching groups" })
     }
-};
+}
 

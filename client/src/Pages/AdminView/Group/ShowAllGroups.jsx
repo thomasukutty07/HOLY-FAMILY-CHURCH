@@ -1,6 +1,6 @@
 // All necessary imports
 import { Button } from "@/components/ui/button";
-import { deleteGroup, fetchFamilyByGroupName } from "@/Store/Group/groupSlice";
+import { deleteGroup, fetchAllGroupNames } from "@/Store/Group/groupSlice";
 import { Loader2, Users, Clock, ChevronRight, PlusCircle } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,11 +8,15 @@ import { toast } from "sonner";
 import GroupDetails from "./GroupDetails";
 import { Link, useNavigate } from "react-router-dom";
 import ConfirmationDialog from "@/components/Common/DeletePopUp";
+import { fetchFamilyWithGroup } from "@/Store/Family/familySlice";
 
 const ShowAllGroups = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { groupData, loading } = useSelector((state) => state.group);
+  const { groupNames } = useSelector((state) => state.group);
+  const { groupedFamilyNames, familyLoading } = useSelector(
+    (state) => state.family
+  );
 
   const [groupSelected, setGroupSelected] = useState(false);
   const [currentSelectedGroup, setCurrentSelectedGroup] = useState(null);
@@ -25,33 +29,21 @@ const ShowAllGroups = () => {
     message: "",
     confirmLabel: "",
     onConfirm: () => {},
-    onCancel: () => {},
   });
 
   useEffect(() => {
-    dispatch(fetchFamilyByGroupName());
+    dispatch(fetchAllGroupNames());
   }, [dispatch]);
 
   const transformCloudinaryUrl = (url) =>
     url?.replace("/upload/", "/upload/w_900,h_600,c_thumb,g_face/") ||
     "https://via.placeholder.com/900x600";
 
-  if (loading) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-gray-50">
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="animate-spin w-12 h-12 text-indigo-600" />
-          <p className="text-gray-600 font-medium">Loading groups...</p>
-        </div>
-      </div>
-    );
-  }
-
   const handleDeleteGroup = (id, name, e) => {
     e.stopPropagation();
     setDialogConfig({
       title: "Delete Group",
-      description: `Are you sure you want to delete "${name}"?`,
+      description: `Are you sure you want to delete ${name}?`,
       message:
         "This will permanently remove the group and unlink all associated families. This action cannot be undone.",
       confirmLabel: "Delete Group",
@@ -59,7 +51,7 @@ const ShowAllGroups = () => {
         dispatch(deleteGroup(id)).then((data) => {
           if (data?.payload?.success) {
             toast.success(data?.payload?.message);
-            dispatch(fetchFamilyByGroupName());
+            dispatch(fetchAllGroupNames());
             setConfirmDialogOpen(false);
           }
         });
@@ -75,12 +67,19 @@ const ShowAllGroups = () => {
     ).padStart(2, "0")}-${date.getFullYear()}`;
   };
 
-  const getFamilyCount = (family) => family.length;
+  if (familyLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-105px)] bg-gray-50">
+        <Loader2 className="animate-spin w-12 h-12 text-indigo-600 mb-4" />
+        <p className="text-gray-600 font-medium">Loading...</p>
+      </div>
+    );
+  }
 
   return groupSelected ? (
     <GroupDetails
       group={currentSelectedGroup}
-      families={currentSelectedGroup.families}
+      families={groupedFamilyNames}
       onBack={setGroupSelected}
     />
   ) : (
@@ -110,16 +109,16 @@ const ShowAllGroups = () => {
 
         {/* Groups Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {groupData?.map((group) => (
+          {groupNames?.map((group) => (
             <div
               key={group._id}
               className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border border-gray-100 cursor-pointer"
               onMouseEnter={() => setHoveredGroup(group._id)}
               onMouseLeave={() => setHoveredGroup(null)}
               onClick={() => {
-                dispatch(fetchFamilyByGroupName());
-                setGroupSelected(true);
                 setCurrentSelectedGroup(group);
+                dispatch(fetchFamilyWithGroup(currentSelectedGroup._id));
+                setGroupSelected(true);
               }}
             >
               {/* Image Section */}
@@ -147,7 +146,7 @@ const ShowAllGroups = () => {
                   <div className="flex flex-col space-y-2">
                     <div className="flex items-center text-sm text-gray-500">
                       <Users size={16} className="mr-2" />
-                      <span>{getFamilyCount(group.families)} families</span>
+                      <span>{group.totalFamilies} families</span>
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
                       <Clock size={16} className="mr-2" />
@@ -160,9 +159,9 @@ const ShowAllGroups = () => {
                   <Button
                     onClick={(e) => {
                       e.stopPropagation();
-                      dispatch(fetchFamilyByGroupName(group._id));
-                      setGroupSelected(true);
                       setCurrentSelectedGroup(group);
+                      dispatch(fetchFamilyWithGroup(currentSelectedGroup._id));
+                      setGroupSelected(true);
                     }}
                     className="flex-1 mr-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg py-2 flex items-center justify-center transition-colors"
                   >
@@ -184,7 +183,7 @@ const ShowAllGroups = () => {
           ))}
 
           {/* Add New Group Card */}
-          {groupData?.length > 1 && (
+          {groupNames?.length > 1 && (
             <div
               onClick={() => navigate("/admin/create-group")}
               className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 border-dashed flex flex-col items-center justify-center p-10 cursor-pointer hover:bg-gray-50 min-h-[300px]"
@@ -203,7 +202,7 @@ const ShowAllGroups = () => {
         </div>
 
         {/* Empty State */}
-        {groupData?.length === 0 && (
+        {groupNames?.length === 0 && (
           <div className="bg-white rounded-xl p-10 shadow-md border border-gray-200 text-center">
             <div className="w-20 h-20 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-6">
               <Users size={32} className="text-gray-400" />
@@ -222,7 +221,7 @@ const ShowAllGroups = () => {
         )}
 
         {/* Pagination */}
-        {groupData?.length > 9 && (
+        {groupNames?.length > 9 && (
           <div className="mt-10 flex justify-center">
             <nav className="flex items-center space-x-2">
               <button className="px-3 py-1 rounded border border-gray-300 text-gray-500 hover:bg-gray-50">
@@ -250,7 +249,6 @@ const ShowAllGroups = () => {
         message={dialogConfig.message}
         confirmLabel={dialogConfig.confirmLabel}
         onConfirm={dialogConfig.onConfirm}
-        onCancel={dialogConfig.onCancel}
       />
     </div>
   );

@@ -1,6 +1,5 @@
 import Family from "../Models/family.js"
-import Group from '../Models/group.js'
-import mongoose from "mongoose";
+import Member from "../Models/member.js"
 import uploadToCloudinary from "../Helpers/cloudinaryHelper.js";
 import cloudinary from "../Config/cloudinary.js";
 export const uploadFamilyImage = async (req, res) => {
@@ -29,12 +28,13 @@ export const uploadFamilyImage = async (req, res) => {
         });
     }
 };
-
 export const createFamily = async (req, res) => {
     try {
-        const { familyName, group, imageUrl, publicId, contactNo, address, headOfFamily } = req.body
+        const { familyName, group, imageUrl, publicId, contactNo, address, location, headOfFamily } = req.body
+        console.log(publicId);
+
         const newFamily = new Family({
-            familyName, group, imageUrl, publicId, contactNo, address, headOfFamily
+            familyName, group, imageUrl, publicId, contactNo, address, headOfFamily, location
         })
         if (!newFamily) {
             return res.status(401).json({ success: false, message: "Family creation failed" })
@@ -54,17 +54,43 @@ export const updateFamily = async (req, res) => {
 
     }
 }
-export const fetchFamily = async (req, res) => {
+export const deleteFamily = async (req, res) => {
     try {
+        const { familyId } = req.params
 
+        const family = await Family.findById(familyId)
+        if (!family) {
+            return res.status(404).json({ success: false, message: "Family Not found" })
+        }
+        if (family.publicId) {
+            await cloudinary.uploader.destroy(family.publicId)
+        }
+
+        await Member.deleteMany({ family: family._id })
+        await Family.findByIdAndDelete(familyId)
+        return res.status(200).json({ success: true, message: "Family Deleted Successfully" })
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Failed to update family" })
+        return res.status(500).json({ success: false, message: "Failed to delete family" })
 
     }
 }
-export const deleteFamily = async (req, res) => {
+export const fetchAllFamily = async (req, res) => {
     try {
-        const { group } = req.params
+        const families = await Family.find({})
+        if (families.length === 0) {
+            return res.status(404).json({ success: false, message: "No families found" })
+        }
+
+        const familyWithMemberCount = await Promise.all(
+            families.map(async (family) => {
+                const memberCount = await Member.countDocuments({ family: family._id })
+                return {
+                    ...family.toObject(),
+                    totalMembers: memberCount
+                }
+            })
+        )
+        return res.status(200).json({ success: true, families: familyWithMemberCount })
     } catch (error) {
         return res.status(500).json({ success: false, message: "Failed to delete family" })
 
@@ -85,4 +111,15 @@ export const deleteFamilyImage = async (req, res) => {
 
     }
 }
+export const fetchFamilyWithGroup = async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const families = await Family.find({ group: groupId });
+
+        return res.status(200).json({ success: true, data: families });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: "Error while fetching families", error: error.message });
+    }
+}
+
 

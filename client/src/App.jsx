@@ -20,7 +20,6 @@ import ShowAllMembers from "./Pages/AdminView/Member/ShowAllMembers";
 import ShowAllGroups from "./Pages/AdminView/Group/ShowAllGroups";
 const App = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
-  const { familyNames, groupNames,groupData } = useSelector((state) => state.group);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   useEffect(() => {

@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { uploadFamilyImage } from "@/Store/Family/familySlice";
+import { fetchAllFamily, uploadFamilyImage } from "@/Store/Family/familySlice";
 import {
   createGroup,
   deleteGroupImage,
-  fetchFamilyByGroupName,
+  fetchAllGroupNames,
 } from "@/Store/Group/groupSlice";
 import { toast } from "sonner";
 import { addGroupFormControls as updatedFormDataControls } from "@/config";
@@ -28,10 +28,8 @@ export const useCreateGroupLogic = () => {
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
   const dispatch = useDispatch();
-  const { groupNames, familyNames, loading ,groupData} = useSelector(
-    (state) => state.group
-  );
-
+  const { groupNames, groupLoading } = useSelector((state) => state.group);
+  const { familyNames, familyLoading } = useSelector((state) => state.family);
   // Reset image-related state
   const resetImageState = useCallback(() => {
     setFile(null);
@@ -48,30 +46,54 @@ export const useCreateGroupLogic = () => {
     if (fileInput) fileInput.value = "";
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsFormSubmitted(true);
-
-    const updatedFormData = {
+    let updatedFormData = {
       ...formData,
       imageUrl: imageUrl || "",
       publicId: publicId || "",
     };
+    console.log("FormData before validation:", updatedFormData);
 
-    const formToSubmit = new FormData();
-    Object.entries(updatedFormData).forEach(([key, value]) =>
-      formToSubmit.append(key, value)
-    );
+    const allFieldsFilled = Object.keys(updatedFormData).every((key) => {
+      const value = updatedFormData[key];
+      return (
+        value !== null && value !== undefined && String(value).trim() !== ""
+      );
+    });
 
-    dispatch(createGroup(formToSubmit)).then((data) => {
-      if (data?.payload?.success) {
-        toast.success(data.payload.message);
+    if (!allFieldsFilled) {
+      return toast.error("Please fill out all required fields.");
+    }
+
+
+    try {
+      setIsFormSubmitted(true);
+
+      const formToSubmit = new FormData();
+      Object.entries(updatedFormData).forEach(([key, value]) =>
+        formToSubmit.append(key, value)
+      );
+
+      const response = await dispatch(createGroup(formToSubmit));
+      console.log("Create Group Response:", response);
+
+      if (response?.payload?.success) {
+        toast.success(response.payload.message);
         setFormData(initialFormData);
         resetImageState();
         setFormKey((prev) => prev + 1);
-        dispatch(fetchFamilyByGroupName());
+        dispatch(fetchAllFamily());
+        dispatch(fetchAllGroupNames());
+      } else {
+        toast.error("Failed to create group. Please try again.");
       }
-    });
+    } catch (error) {
+      console.error("Form submission error:", error);
+      toast.error("An error occurred while adding the group.");
+    } finally {
+      setIsFormSubmitted(false);
+    }
   };
 
   const handleDeleteImage = useCallback(async () => {
@@ -125,11 +147,12 @@ export const useCreateGroupLogic = () => {
         setSelectedFileName(storedFileName);
       }
     }
-  }, []);
+  }, [publicId]);
 
   // Fetch initial data
   useEffect(() => {
-    dispatch(fetchFamilyByGroupName());
+    dispatch(fetchAllFamily());
+    dispatch(fetchAllGroupNames());
   }, [dispatch]);
 
   // Handle file upload
@@ -140,6 +163,8 @@ export const useCreateGroupLogic = () => {
         const imageFormData = new FormData();
         imageFormData.append("image", file);
         dispatch(uploadFamilyImage(imageFormData)).then((data) => {
+          console.log(data);
+
           if (data?.payload?.success) {
             setImageUrl(data.payload.imageUrl);
             setPublicId(data.payload.publicId);
@@ -170,7 +195,8 @@ export const useCreateGroupLogic = () => {
     isDeletingImage,
     imageUrl,
     publicId,
-    loading,
-    groupData
+    groupLoading,
+    familyLoading,
+    isFormSubmitted,
   };
 };

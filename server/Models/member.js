@@ -14,7 +14,7 @@ const memberSchema = new mongoose.Schema({
     dateOfDeath: { type: Date },
     baptismDate: { type: Date },
     isActive: { type: Boolean, required: true },
-    familyId: {
+    family: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Family",
         set: v => v === '' ? undefined : v

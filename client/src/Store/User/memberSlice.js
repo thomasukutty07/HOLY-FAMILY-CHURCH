@@ -3,6 +3,8 @@ import axios from "axios";
 
 const initialState = {
     members: [],
+    groupedFamilyMembers: [],
+    imageLoading: false,
     memberLoading: false,
 };
 
@@ -44,12 +46,11 @@ export const createMember = createAsyncThunk(
     }
 );
 
-
 export const deleteMemberImage = createAsyncThunk(
-    "admin/deleteMemberImage", 
+    "admin/deleteMemberImage",
     async (id, { rejectWithValue }) => {
         try {
-            const imageId = id.replace(/^church\//, ""); 
+            const imageId = id.replace(/^church\//, "");
             const response = await axios.delete(
                 `http://localhost:4000/church/admin/member/delete-image/${imageId}`
             );
@@ -77,14 +78,27 @@ export const fetchAllMembers = createAsyncThunk(
         }
     }
 );
-
+export const fetchFamilyWithMembers = createAsyncThunk(
+    "admin/family/members",
+    async (id, { rejectWithValue }) => {
+        try {
+            const response = await axios.get(
+                `http://localhost:4000/church/admin/${id}/members`
+            );
+            return response?.data;
+        } catch (error) {
+            console.error(error.message);
+            return rejectWithValue(error.response?.data || { message: "Failed to fetch members" });
+        }
+    }
+);
 
 export const updateMember = createAsyncThunk(
     "admin/updateMember",
     async (memberData, { rejectWithValue }) => {
         try {
             const response = await axios.put(
-                `http://localhost:4000/church/admin/members/${memberData.id}`,
+                `http://localhost:4000/church/admin/members/update/${memberData.id}`,
                 memberData,
                 {
                     headers: { "Content-Type": "application/json" },
@@ -130,17 +144,36 @@ const memberSlice = createSlice({
                 state.memberLoading = false;
                 state.members = null;
             })
-            .addCase(updateMember.fulfilled, (state, action) => {
-                const updatedMember = action.payload.user;
-                const index = state.members.findIndex((m) => m.id === updatedMember.id);
-                if (index !== -1) {
-                    state.members[index] = updatedMember;
-                }
+            .addCase(uploadMemberImage.pending, (state) => {
+                state.imageLoading = true
             })
-            .addCase(deleteMember.fulfilled, (state, action) => {
-                const { memberId } = action.payload;
-                state.members = state.members.filter((m) => m.id !== memberId);
-            });
+            .addCase(uploadMemberImage.fulfilled, (state) => {
+                state.imageLoading = false;
+            })
+            .addCase(uploadMemberImage.rejected, (state) => {
+                state.imageLoading = false;
+            })
+            .addCase(deleteMemberImage.pending, (state) => {
+                state.imageLoading = true
+            })
+            .addCase(deleteMemberImage.fulfilled, (state) => {
+                state.imageLoading = false;
+            })
+            .addCase(deleteMemberImage.rejected, (state) => {
+                state.imageLoading = false;
+            })
+            .addCase(fetchFamilyWithMembers.pending, (state) => {
+                state.memberLoading = true;
+                state.groupedFamilyMembers = [];
+            })
+            .addCase(fetchFamilyWithMembers.fulfilled, (state, action) => {
+                state.memberLoading = false;
+                state.groupedFamilyMembers = action.payload.members;
+            })
+            .addCase(fetchFamilyWithMembers.rejected, (state) => {
+                state.memberLoading = false;
+                state.groupedFamilyMembers = [];
+            })
     },
 });
 

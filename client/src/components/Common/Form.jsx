@@ -45,7 +45,7 @@ const CommonForm = ({
       email: <MailIcon className="h-4 w-4 text-gray-400" />,
       password: <LockIcon className="h-4 w-4 text-gray-400" />,
       name: <UserIcon className="h-4 w-4 text-gray-400" />,
-      familyId: <HomeIcon className="h-4 w-4 text-gray-400" />,
+      family: <HomeIcon className="h-4 w-4 text-gray-400" />,
       group: <UsersIcon className="h-4 w-4 text-gray-400" />,
       dateOfBirth: <Calendar className="h-4 w-4 text-gray-400" />,
       marriageDate: <Calendar className="h-4 w-4 text-gray-400" />,
@@ -292,7 +292,7 @@ const CommonForm = ({
     const isRestrictedField = [
       "married",
       "marriageDate",
-      "familyId",
+      "family",
       "group",
     ].includes(control.name);
     if (restrictedRoles.includes(role) && isRestrictedField) return false;
@@ -320,7 +320,7 @@ const CommonForm = ({
       "imageUrl",
     ];
     const accountFields = ["email", "password", "role"];
-    const relationshipFields = ["married", "marriageDate", "familyId", "group"];
+    const relationshipFields = ["married", "marriageDate", "family", "group"];
 
     formControls.forEach((control) => {
       if (!control.name || !isFieldVisible(control)) return;
@@ -363,7 +363,7 @@ const CommonForm = ({
         </CardContent>
         <CardFooter className="p-4 border-t flex items-center justify-center">
           <Button
-            type="submit" // Changed from "button" to "submit"
+            type="submit" 
             className="bg-indigo-600 cursor-pointer hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center gap-2 shadow-sm"
           >
             {buttonText || "Submit"}

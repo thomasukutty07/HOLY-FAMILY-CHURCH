@@ -29,7 +29,6 @@ export const uploadMemberImage = async (req, res) => {
         });
     }
 };
-
 //  Add Member
 export const addMember = async (req, res) => {
     try {
@@ -47,7 +46,7 @@ export const addMember = async (req, res) => {
             dateOfDeath,
             baptismName,
             baptismDate,
-            familyId,
+            family,
             isActive,
             group,
             married,
@@ -64,7 +63,7 @@ export const addMember = async (req, res) => {
             baptismName,
             baptismDate,
             sex,
-            familyId,
+            family,
             isActive,
             group,
             married,
@@ -84,6 +83,18 @@ export const addMember = async (req, res) => {
     }
 };
 
+export const fetchFamilyWithMembers = async (req, res) => {
+    try {
+        const { familyId } = req.params;
+        const members = await Member.find({ family: familyId });
+
+        res.status(200).json({ success: true, members });
+    } catch (error) {
+        console.error("Fetch Members Error:", error.message);
+        res.status(500).json({ success: false, message: "Error occurred while fetching all members" });
+    }
+};
+
 // Fetch All Members
 export const fetchAllMembers = async (req, res) => {
     try {
@@ -100,7 +111,6 @@ export const fetchAllMembers = async (req, res) => {
         res.status(500).json({ success: false, message: "Error occurred while fetching all members" });
     }
 };
-
 // Update Member
 export const updateMember = async (req, res) => {
     try {
@@ -111,19 +121,23 @@ export const updateMember = async (req, res) => {
             imageUrl,
             sex,
             dateOfBirth,
+            married,
             marriageDate,
             dateOfDeath,
             baptismName,
             baptismDate,
+            isActive,
             group,
-            familyId,
+            family,
             role
         } = req.body;
 
         const updatedFields = {
             name,
             imageUrl,
+            married,
             publicId,
+            isActive,
             sex,
             dateOfBirth,
             marriageDate,
@@ -131,7 +145,7 @@ export const updateMember = async (req, res) => {
             baptismName,
             baptismDate,
             group,
-            familyId,
+            family,
             role
         };
 
@@ -151,7 +165,6 @@ export const updateMember = async (req, res) => {
         });
     }
 };
-
 // Delete Member
 export const deleteMember = async (req, res) => {
     try {

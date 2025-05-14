@@ -235,7 +235,7 @@ const GroupFamiliesTable = ({ families }) => {
 
 const GroupDetails = ({ group, families, onBack }) => {
   const { familyLoading } = useSelector((state) => state.family);
-
+  console.log("Family", families);
   const transformCloudinaryUrl = (url) =>
     url?.replace("/upload/", "/upload/w_300,h_300,c_thumb,g_face/") ||
     "https://via.placeholder.com/300";

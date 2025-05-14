@@ -8,6 +8,7 @@ import authRouter from '../server/Routes/authRoutes.js';
 import familyRouter from '../server/Routes/familyRoute.js';
 import groupRouter from '../server/Routes/groupRoute.js';
 
+
 dotenv.config();
 
 const app = express();
@@ -27,7 +28,6 @@ app.use("/church/admin", memberRouter);
 app.use("/church/auth", authRouter);
 app.use("/church/family", familyRouter);
 app.use("/church/groups", groupRouter);
-
 // Start server
 function startServer() {
     connectDb();

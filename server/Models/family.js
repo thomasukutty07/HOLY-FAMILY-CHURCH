@@ -4,11 +4,17 @@ const familySchema = new mongoose.Schema({
     imageUrl: {
         type: String,
         required: false,
+        trim: true
     },
     familyName: {
         type: String,
         required: true,
         trim: true,
+    },
+    publicId: {
+        type: String,
+        required: false
+        , trim: true
     },
     headOfFamily: {
         type: String,
@@ -19,6 +25,11 @@ const familySchema = new mongoose.Schema({
         type: String,
         required: true,
         trim: true,
+    },
+    location: {
+        type: String,
+        required: true,
+        trim: true
     },
     address: {
         type: String,

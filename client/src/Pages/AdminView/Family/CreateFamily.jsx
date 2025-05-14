@@ -13,7 +13,7 @@ const CreateFamily = () => {
     formKey,
     setFile,
     updatedFormDataControls,
-    loading,
+    familyLoading,
     familyNames,
     handleDeleteImage,
     selectedFileName,
@@ -22,11 +22,11 @@ const CreateFamily = () => {
     imageUrl,
   } = useCreateFamilyLogic();
 
-  if (loading) {
+  if (familyLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-105px)] bg-gray-50">
         <Loader2 className="animate-spin w-12 h-12 text-indigo-600 mb-4" />
-        <p className="text-gray-600 font-medium">Loading family data...</p>
+        <p className="text-gray-600 font-medium">Loading...</p>
       </div>
     );
   }

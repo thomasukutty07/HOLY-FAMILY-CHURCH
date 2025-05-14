@@ -13,20 +13,23 @@ const CreateGroup = () => {
     formKey,
     setFile,
     updatedFormDataControls,
-    groupLoading,
     handleDeleteImage,
     selectedFileName,
     setSelectedFileName,
     isDeletingImage,
     imageUrl,
-    groupData,
+    familyLoading,
+    groupLoading,
+    isFormSubmitted,
+    groupNames,
+    familyNames,
   } = useCreateGroupLogic();
 
-  if (groupLoading) {
+  if (groupLoading || familyLoading || isFormSubmitted) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-105px)] bg-gray-50">
         <Loader2 className="animate-spin w-12 h-12 text-indigo-600 mb-4" />
-        <p className="text-gray-600 font-medium">Loading group data...</p>
+        <p className="text-gray-600 font-medium">Loading...</p>
       </div>
     );
   }
@@ -41,7 +44,7 @@ const CreateGroup = () => {
           <h1 className="text-2xl font-bold text-gray-800">Create Group</h1>
         </div>
 
-        {groupData?.length > 0 && (
+        {groupNames?.length > 0 && (
           <Button
             type="button"
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center gap-2 shadow-sm"

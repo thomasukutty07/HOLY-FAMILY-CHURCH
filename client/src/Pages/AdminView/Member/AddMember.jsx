@@ -13,7 +13,7 @@ const AddMember = () => {
     formKey,
     setFile,
     updatedFormDataControls,
-    loading,
+    memberLoading,
     members,
     handleDeleteImage,
     selectedFileName,
@@ -23,11 +23,11 @@ const AddMember = () => {
   } = useAddMemberLogic();
 
   // Show loading state when data is being fetched
-  if (loading) {
+  if (memberLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-105px)] bg-gray-50">
         <Loader2 className="animate-spin w-12 h-12 text-indigo-600 mb-4" />
-        <p className="text-gray-600 font-medium">Loading member data...</p>
+        <p className="text-gray-600 font-medium">Loading...</p>
       </div>
     );
   }

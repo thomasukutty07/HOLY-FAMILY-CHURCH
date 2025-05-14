@@ -20,7 +20,6 @@ const ConfirmationDialog = ({
   cancelLabel = "Cancel",
   confirmVariant = "destructive",
   onConfirm,
-  onCancel,
   icon = <AlertTriangle className="h-5 w-5 text-red-500 mr-2" />,
 }) => {
   const handleCancel = () => {
@@ -45,11 +44,11 @@ const ConfirmationDialog = ({
           <p className="text-sm text-gray-500">{message}</p>
         </div>
         <DialogFooter className="sm:justify-between">
-          <Button
+          <Button 
             type="button"
             variant="outline"
             onClick={handleCancel}
-            className="mt-2 sm:mt-0"
+            className="mt-2 sm:mt-0 cursor-pointer"
           >
             {cancelLabel}
           </Button>
@@ -59,7 +58,7 @@ const ConfirmationDialog = ({
             onClick={handleConfirm}
             className={
               confirmVariant === "destructive"
-                ? "bg-red-600 hover:bg-red-700 text-white"
+                ? "bg-red-600 hover:bg-red-700 cursor-pointer text-white"
                 : ""
             }
           >

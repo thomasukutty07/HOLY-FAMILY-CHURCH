@@ -1,15 +1,22 @@
 import express from 'express'
 import {
     createFamily,
+    deleteFamily,
     deleteFamilyImage,
+    fetchAllFamily,
+    fetchFamilyWithGroup,
     uploadFamilyImage
 } from '../Controllers/familyController.js'
 
 import { upload } from '../Middleware/uploadMiddleware.js'
 
+
 const router = express.Router()
-router.post("/", createFamily)
+router.get("/", fetchAllFamily)
+router.post("/create-family", createFamily)
 router.post("/upload-image", upload.single("image"), uploadFamilyImage)
 router.delete("/delete-image/:publicId", deleteFamilyImage)
+router.delete("/delete/:familyId", deleteFamily)
+router.get("/:groupId/families", fetchFamilyWithGroup)
 
 export default router

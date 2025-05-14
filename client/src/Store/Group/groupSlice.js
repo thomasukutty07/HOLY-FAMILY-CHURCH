@@ -3,14 +3,13 @@ import axios from "axios";
 
 const initialState = {
     groupNames: [],
-    familyNames: [],
     groupData: null,
-    loading: false,
+    familyLoading: false,
 }
 
 export const createGroup = createAsyncThunk("group/create", async (data, { rejectWithValue }) => {
     try {
-        const response = await axios.post("http://localhost:4000/church/groups", data, {
+        const response = await axios.post("http://localhost:4000/church/groups/create-group", data, {
             headers: {
                 "Content-Type": "application/json"
             }
@@ -53,9 +52,9 @@ export const uploadGroupImage = createAsyncThunk("group/upload-image", async (da
     }
 })
 
-export const fetchFamilyByGroupName = createAsyncThunk("group/fetchGroupsWithFamily", async (data, { rejectWithValue }) => {
+export const fetchAllGroupNames = createAsyncThunk("group/fetchGroupsWithFamily", async (data, { rejectWithValue }) => {
     try {
-        const response = await axios.get("http://localhost:4000/church/groups/names/grouped")
+        const response = await axios.get("http://localhost:4000/church/groups")
         return response?.data
     } catch (error) {
         console.error(error.message)
@@ -68,36 +67,16 @@ const groupSlice = createSlice({
     initialState,
     reducers: {},
     extraReducers: (builder) => {
-        builder
-            .addCase(fetchFamilyByGroupName.pending, (state) => {
-                state.loading = true
-            })
-            .addCase(fetchFamilyByGroupName.fulfilled, (state, action) => {
-                state.loading = false;
-
-                // Store the full response in groupData
-                state.groupData = action.payload.data
-
-                // Store only group data (excluding familyName)
-                state.groupNames = action.payload.data.map(group => {
-                    const { families, ...groupInfo } = group; // Destructure to exclude families
-                    return groupInfo; // Return only group-level properties, excluding families
-                })
-
-                // Store full familyName data (keep group field)
-                state.familyNames = action.payload.data.reduce((acc, group) => {
-                    group.families.forEach(family => {
-                        acc.push(family); // Keep the full family object with the group field
-                    });
-                    return acc;
-                }, []);
-            })
-            .addCase(fetchFamilyByGroupName.rejected, (state) => {
-                state.loading = false
-                state.familyNames = [] // Reset familyName state on failure
-                state.groupNames = [] // Reset group state on failure
-                state.groupData = null // Reset groupData on failure
-            })
+        builder.addCase(fetchAllGroupNames.pending, (state) => {
+            state.groupNames = []
+            state.familyLoading = true
+        }).addCase(fetchAllGroupNames.fulfilled, (state, action) => {
+            state.groupNames = action.payload.groups
+            state.familyLoading = false
+        }).addCase(fetchAllGroupNames.rejected, (state) => {
+            state.groupNames = []
+            state.familyLoading = false
+        })
     }
 })
 

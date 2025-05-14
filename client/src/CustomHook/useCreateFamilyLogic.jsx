@@ -4,11 +4,11 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   createFamily,
   deleteFamilyImage,
+  fetchAllFamily,
   uploadFamilyImage,
 } from "@/Store/Family/familySlice";
 import { toast } from "sonner";
 import { addFamilyFormControls } from "@/config";
-import { fetchFamilyByGroupName } from "@/Store/Group/groupSlice";
 
 const initialFormData = {
   familyName: "",
@@ -18,7 +18,11 @@ const initialFormData = {
   publicId: "",
   headOfFamily: "",
   address: "",
+  location: "",
 };
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_FILE_TYPES = ["image/jpeg", "image/png", "image/jpg"];
 
 export const useCreateFamilyLogic = () => {
   const [formData, setFormData] = useState(initialFormData);
@@ -26,14 +30,34 @@ export const useCreateFamilyLogic = () => {
   const [imageUrl, setImageUrl] = useState(null);
   const [publicId, setPublicId] = useState(null);
   const [formKey, setFormKey] = useState(0);
-
-  const dispatch = useDispatch();
-  const { familyNames, groupNames, loading } = useSelector(
-    (state) => state.group
-  );
   const [selectedFileName, setSelectedFileName] = useState(null);
   const [isDeletingImage, setIsDeletingImage] = useState(false);
-  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const dispatch = useDispatch();
+  const { familyNames, familyLoading } = useSelector((state) => state.family);
+  const { groupNames, groupLoading } = useSelector((state) => state.group);
+
+  // Reset all form state
+  const resetForm = useCallback(() => {
+    setFormData(initialFormData);
+    setFile(null);
+    setImageUrl(null);
+    setPublicId(null);
+    setSelectedFileName(null);
+    setErrors({});
+
+    // Clean up sessionStorage
+    sessionStorage.removeItem("tempFamilyImagePublicId");
+    sessionStorage.removeItem("tempFamilyImageUrl");
+    sessionStorage.removeItem("tempFamilyFileName");
+
+    const fileInput = document.getElementById("imageUrl");
+    if (fileInput) fileInput.value = "";
+
+    setFormKey((prev) => prev + 1);
+  }, []);
 
   // Reset image-related state
   const resetImageState = useCallback(() => {
@@ -41,6 +65,11 @@ export const useCreateFamilyLogic = () => {
     setImageUrl(null);
     setPublicId(null);
     setSelectedFileName(null);
+    setFormData((prev) => ({
+      ...prev,
+      imageUrl: "",
+      publicId: "",
+    }));
 
     // Clean up sessionStorage
     sessionStorage.removeItem("tempFamilyImagePublicId");
@@ -51,8 +80,52 @@ export const useCreateFamilyLogic = () => {
     if (fileInput) fileInput.value = "";
   }, []);
 
+  // Validate form fields
+  const validateForm = (data) => {
+    const newErrors = {};
+
+    if (!data.familyName.trim()) {
+      newErrors.familyName = "Family name is required";
+    }
+
+    if (!data.group) {
+      newErrors.group = "Group is required";
+    }
+
+    if (!data.contactNo) {
+      newErrors.contactNo = "Contact number is required";
+    } else if (!/^\d{10}$/.test(data.contactNo)) {
+      newErrors.contactNo = "Contact number must be 10 digits";
+    }
+
+    if (!data.headOfFamily.trim()) {
+      newErrors.headOfFamily = "Head of family is required";
+    }
+
+    if (!data.address.trim()) {
+      newErrors.address = "Address is required";
+    }
+
+    if (!data.location.trim()) {
+      newErrors.location = "Location is required";
+    }
+
+    return newErrors;
+  };
+
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate form
+    const formErrors = validateForm(formData);
+    if (Object.keys(formErrors).length > 0) {
+      setErrors(formErrors);
+      Object.values(formErrors).forEach((error) => toast.error(error));
+      return;
+    }
+
+    setIsSubmitting(true);
 
     try {
       const updatedFormData = {
@@ -69,12 +142,9 @@ export const useCreateFamilyLogic = () => {
       const response = await dispatch(createFamily(formToSubmit));
 
       if (response?.payload?.success) {
-        setIsFormSubmitted(true);
         toast.success(response.payload.message || "Family added successfully");
-        setFormData(initialFormData);
-        resetImageState();
-        dispatch(fetchFamilyByGroupName());
-        setFormKey((prev) => prev + 1);
+        resetForm();
+        dispatch(fetchAllFamily());
       } else {
         const errorMsg =
           response.payload?.message ||
@@ -85,7 +155,26 @@ export const useCreateFamilyLogic = () => {
     } catch (error) {
       console.error("Form submission error:", error);
       toast.error("An error occurred while adding the family");
+    } finally {
+      setIsSubmitting(false);
     }
+  };
+
+
+  const handleFileChange = (selectedFile) => {
+    if (!selectedFile) {
+      return;
+    }
+    if (selectedFile.size > MAX_FILE_SIZE) {
+      toast.error("File size exceeds 5MB limit");
+      return;
+    }
+    if (!ALLOWED_FILE_TYPES.includes(selectedFile.type)) {
+      toast.error("Only JPG, JPEG, and PNG files are allowed");
+      return;
+    }
+    setFile(selectedFile);
+    setSelectedFileName(selectedFile.name);
   };
 
   // Image deletion
@@ -126,12 +215,12 @@ export const useCreateFamilyLogic = () => {
       : field
   );
 
-  // Initial data
+  // Initial data fetch
   useEffect(() => {
-    dispatch(fetchFamilyByGroupName());
+    dispatch(fetchAllFamily());
   }, [dispatch]);
 
-  // Using sessionStorage to persist publicId during page refreshes
+  // Load stored image data from sessionStorage
   useEffect(() => {
     const storedPublicId = sessionStorage.getItem("tempFamilyImagePublicId");
     if (storedPublicId && !publicId) {
@@ -149,7 +238,7 @@ export const useCreateFamilyLogic = () => {
     }
   }, [publicId]);
 
-  // Save publicId to sessionStorage whenever it changes
+  // Save image data to sessionStorage
   useEffect(() => {
     if (publicId) {
       sessionStorage.setItem("tempFamilyImagePublicId", publicId);
@@ -162,7 +251,16 @@ export const useCreateFamilyLogic = () => {
     }
   }, [publicId, imageUrl, selectedFileName]);
 
-  // Handle image upload
+  // Cleanup sessionStorage on unmount
+  useEffect(() => {
+    return () => {
+      sessionStorage.removeItem("tempFamilyImagePublicId");
+      sessionStorage.removeItem("tempFamilyImageUrl");
+      sessionStorage.removeItem("tempFamilyFileName");
+    };
+  }, []);
+
+  // Handle image upload when file changes
   useEffect(() => {
     if (!file) return;
 
@@ -179,6 +277,11 @@ export const useCreateFamilyLogic = () => {
 
           setImageUrl(uploadedImageUrl);
           setPublicId(uploadedPublicId);
+          setFormData((prev) => ({
+            ...prev,
+            imageUrl: uploadedImageUrl,
+            publicId: uploadedPublicId,
+          }));
           toast.success(
             response.payload.message || "Image uploaded successfully"
           );
@@ -201,15 +304,18 @@ export const useCreateFamilyLogic = () => {
     setFormData,
     handleSubmit,
     formKey,
-    setFile,
+    setFile: handleFileChange,
     updatedFormDataControls,
-    loading,
+    familyLoading,
     familyNames,
     handleDeleteImage,
     selectedFileName,
     setSelectedFileName,
     isDeletingImage,
     imageUrl,
+    isSubmitting,
+    errors,
+    resetForm,
   };
 };
 
