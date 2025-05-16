@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { loginUser } from "@/Store/User/authSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
+import { Mail, Lock, Church } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const LoginForm = () => {
   const dispatch = useDispatch();
@@ -11,6 +13,23 @@ const LoginForm = () => {
     role: "admin",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  const validateForm = () => {
+    const newErrors = {};
+    if (!formData.email) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      newErrors.email = "Please enter a valid email";
+    }
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,76 +37,127 @@ const LoginForm = () => {
       ...prev,
       [name]: value,
     }));
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: "",
+      }));
+    }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setIsLoading(true);
+    if (!validateForm()) return;
     
+    setIsLoading(true);
     try {
-      const result = await dispatch(loginUser(formData));
-      if (result?.payload?.success) {
-        toast.success(result.payload?.message);
-        // You could add redirect logic here if needed
+      const result = await dispatch(loginUser(formData)).unwrap();
+      if (result.success) {
+        toast.success(result.message || "Login successful");
       } else {
-        toast.error(result?.payload?.message || "Login failed");
+        toast.error(result.message || "Login failed");
       }
     } catch (error) {
-      toast.error("An error occurred during login");
-      console.error(error);
+      toast.error(error.message || "An error occurred during login");
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="w-full flex flex-col gap-3">
-      <div>
-        <h1 className="font-corporates text-5xl bg-clip-text text-transparent bg-gradient-to-br from-[#A22FCE] to-[#FF7000]">
-          Admin Login
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Authorized users only. Please authenticate to proceed
-        </p>
+    <div className="w-full flex flex-col gap-8 relative">
+      {/* Animated Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 opacity-50 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
       </div>
       
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
-        <div className="flex flex-col gap-1">
+      {/* Logo and Welcome Section */}
+      <div className="text-center space-y-4">
+        <div className="flex justify-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center transform rotate-3 hover:rotate-0 transition-all duration-300 shadow-lg">
+            <Church className="w-10 h-10 text-white" />
+          </div>
+        </div>
+        <div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+            Welcome Back
+          </h1>
+          <p className="text-gray-600 mt-2">
+            Sign in to access your admin dashboard
+          </p>
+        </div>
+      </div>
+      
+      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <div className="space-y-2">
           <label htmlFor="email" className="text-sm font-medium text-gray-700">
             Email Address
           </label>
-          <input
-            type="email"
-            id="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder="Enter your email"
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
+            </div>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Enter your email"
+              className={`w-full pl-10 pr-4 py-3 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
+              required
+            />
+            {errors.email && (
+              <p className="mt-1 text-sm text-red-500 animate-fade-in">{errors.email}</p>
+            )}
+          </div>
         </div>
         
-        <div className="flex flex-col gap-1">
+        <div className="space-y-2">
           <label htmlFor="password" className="text-sm font-medium text-gray-700">
             Password
           </label>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder="Enter your password"
-            className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-            required
-          />
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
+            </div>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Enter your password"
+              className={`w-full pl-10 pr-4 py-3 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
+              required
+            />
+            {errors.password && (
+              <p className="mt-1 text-sm text-red-500 animate-fade-in">{errors.password}</p>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="flex items-center">
+            <input
+              id="remember-me"
+              name="remember-me"
+              type="checkbox"
+              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-colors duration-200"
+            />
+            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
+              Remember me
+            </label>
+          </div>
+          <Link to="/auth/forgot-password" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200">
+            Forgot password?
+          </Link>
         </div>
         
         <button
           type="submit"
           disabled={isLoading}
-          className="mt-2 bg-gradient-to-r from-[#A22FCE] to-[#FF7000] text-white py-2 px-4 rounded-md hover:opacity-90 transition-opacity duration-200 flex justify-center items-center"
+          className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-xl hover:opacity-90 transition-all duration-200 flex justify-center items-center text-sm font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isLoading ? (
             <span className="flex items-center">
@@ -101,12 +171,6 @@ const LoginForm = () => {
             "Sign In"
           )}
         </button>
-        
-        <div className="text-center mt-2">
-          <a href="#" className="text-sm text-purple-600 hover:text-purple-800">
-            Forgot password?
-          </a>
-        </div>
       </form>
     </div>
   );

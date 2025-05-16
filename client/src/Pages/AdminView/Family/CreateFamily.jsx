@@ -1,11 +1,12 @@
 import React from "react";
 import CommonForm from "@/components/Common/Form";
 import { Button } from "@/components/ui/button";
-import { Loader2, Home, Trash2 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Loader2, Home, Trash2, Users, ArrowLeft } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import { useCreateFamilyLogic } from "@/CustomHook/useCreateFamilyLogic";
 
 const CreateFamily = () => {
+  const navigate = useNavigate();
   const {
     formData,
     setFormData,
@@ -20,9 +21,12 @@ const CreateFamily = () => {
     setSelectedFileName,
     isDeletingImage,
     imageUrl,
+    groupLoading,
+    isFormSubmitted,
+    groupNames,
   } = useCreateFamilyLogic();
 
-  if (familyLoading) {
+  if (familyLoading || groupLoading || isFormSubmitted) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-105px)] bg-gray-50">
         <Loader2 className="animate-spin w-12 h-12 text-indigo-600 mb-4" />
@@ -34,11 +38,21 @@ const CreateFamily = () => {
   return (
     <div className="bg-white rounded-lg shadow-sm p-8 max-w-7xl mx-auto my-6">
       <div className="flex items-center justify-between border-b border-gray-200 pb-5 mb-6">
-        <div className="flex items-center">
-          <div className="bg-indigo-100 p-2 rounded-lg mr-4">
-            <Home className="h-6 w-6 text-indigo-600" />
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/admin/dashboard")}
+            className="flex items-center gap-2 text-gray-700 hover:text-indigo-600"
+          >
+            <ArrowLeft className="h-5 w-5" />
+            <span>Back</span>
+          </Button>
+          <div className="flex items-center">
+            <div className="bg-indigo-100 p-2 rounded-lg mr-4">
+              <Users className="h-6 w-6 text-indigo-600" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-800">Create Family</h1>
           </div>
-          <h1 className="text-2xl font-bold text-gray-800">Create Family</h1>
         </div>
 
         {familyNames?.length > 0 && (

@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken'
 import Auth from '../Models/auth.js'
 import bcrypt from 'bcryptjs'
+import crypto from 'crypto'
+import nodemailer from 'nodemailer'
 
 // Create User
 export const registerUser = async (req, res) => {
@@ -21,9 +23,8 @@ export const registerUser = async (req, res) => {
 
         const findUser = await Auth.findOne({ email })
         if (findUser) {
-            return res.status(400).json({ success: false, message: "Exisisting account" })
+            return res.status(400).json({ success: false, message: "Existing account" })
         }
-
 
         const salt = await bcrypt.genSalt(12)
         const hashedPassword = await bcrypt.hash(password, salt)
@@ -37,60 +38,266 @@ export const registerUser = async (req, res) => {
             res.status(201).json({ success: true, message: "Success" })
         }
     } catch (error) {
-        console.error("Register error", error.message);
         res.status(500).json({ success: false, message: "Registration failed" });
     }
 }
-// Login User Controller
+
+// Login admin user
 export const loginUser = async (req, res) => {
     try {
-        const { password, email } = req.body;
-        if (!password || !email) {
-            return res.status(400).json({ success: false, message: "Email and Password are required" });
-        }
-        const existingUser = await Auth.findOne({ email });
-        if (!existingUser) {
-            return res.status(400).json({ success: false, message: "User not found" });
+        const { email, password } = req.body;
+
+        // Validate input
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide email and password"
+            });
         }
 
-        const isMatch = await bcrypt.compare(password, existingUser.password);
+        // Find user and ensure they are an admin
+        const user = await Auth.findOne({ email });
+        if (!user) {
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password"
+            });
+        }
+
+        // Verify user is an admin
+        if (user.role !== 'admin') {
+            return res.status(403).json({
+                success: false,
+                message: "Access denied. Admin privileges required."
+            });
+        }
+
+        // Verify password
+        const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(400).json({ success: false, message: "Incorrect password" });
+            return res.status(401).json({
+                success: false,
+                message: "Invalid email or password"
+            });
         }
 
-        const token = jwt.sign({ id: existingUser._id }, process.env.JWT_SECRET_KEY, { expiresIn: "60min" });
+        // Generate JWT token
+        const token = jwt.sign(
+            { id: user._id, role: user.role },
+            process.env.JWT_SECRET_KEY,
+            { expiresIn: "1d" }
+        );
 
+        // Set cookie
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false,
-            // sameSite: 'Strict',
-            // maxAge: 3600000 
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 24 * 60 * 60 * 1000 // 1 day
         });
 
-        res.status(200).json({ success: true, message: "Login successful", token, user: existingUser });
+        // Send response
+        res.status(200).json({
+            success: true,
+            message: "Login successful",
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
 
     } catch (error) {
-        console.error("Login Error:", error.message);
-        res.status(500).json({ success: false, message: "Login failed" });
+        res.status(500).json({
+            success: false,
+            message: "Error during login"
+        });
     }
 };
 
-// Logout User Controller
+// Logout admin user
 export const logoutUser = async (req, res) => {
     try {
-        res.clearCookie("token", {
-            httpOnly: true,
-            secure: false,  // Ensure `secure: true` in production
-            sameSite: 'Strict',
-            path: "/"
-        });
-
-        return res.status(200).json({
+        res.clearCookie("token");
+        res.status(200).json({
             success: true,
-            message: "Logout successful",
+            message: "Logged out successfully"
         });
     } catch (error) {
-        console.log(error.message);
-        return res.status(500).json({ success: false, message: "Error Occurred" });
+        res.status(500).json({
+            success: false,
+            message: "Error during logout"
+        });
+    }
+};
+
+// Forgot Password
+export const forgotPassword = async (req, res) => {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                message: "Please provide an email address"
+            });
+        }
+
+        const user = await Auth.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "No user found with this email address"
+            });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(32).toString('hex');
+        const resetTokenExpiry = Date.now() + 3600000; // 1 hour
+
+        // Save reset token to user
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpires = resetTokenExpiry;
+        await user.save();
+
+        // Create reset URL
+        const resetUrl = `${process.env.CLIENT_URL}/auth/reset-password/${resetToken}`;
+
+        // Create email transporter
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
+            }
+        });
+
+        // Email content
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: user.email,
+            subject: 'Password Reset Request',
+            html: `
+                <h1>Password Reset Request</h1>
+                <p>You requested a password reset. Please click the link below to reset your password:</p>
+                <a href="${resetUrl}">Reset Password</a>
+                <p>This link will expire in 1 hour.</p>
+                <p>If you didn't request this, please ignore this email.</p>
+            `
+        };
+
+        // Send email
+        await transporter.sendMail(mailOptions);
+
+        res.status(200).json({
+            success: true,
+            message: "Password reset email sent"
+        });
+
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).json({
+            success: false,
+            message: "Error processing password reset request"
+        });
+    }
+};
+
+// Reset Password
+export const resetPassword = async (req, res) => {
+    try {
+        const { token, newPassword } = req.body;
+
+        if (!token || !newPassword) {
+            return res.status(400).json({
+                success: false,
+                message: "Token and new password are required"
+            });
+        }
+
+        const user = await Auth.findOne({
+            resetPasswordToken: token,
+            resetPasswordExpires: { $gt: Date.now() }
+        });
+
+        if (!user) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or expired reset token"
+            });
+        }
+
+        // Hash new password
+        const salt = await bcrypt.genSalt(12);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        // Update user password and clear reset token
+        user.password = hashedPassword;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpires = undefined;
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "Password has been reset successfully"
+        });
+
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({
+            success: false,
+            message: "Error resetting password"
+        });
+    }
+};
+
+// Create Admin Account
+export const createAdmin = async (req, res) => {
+    try {
+        const { userName, email, password, role } = req.body;
+
+        // Validate input
+        if (!userName || !email || !password || !role) {
+            return res.status(400).json({
+                success: false,
+                message: "All fields are required"
+            });
+        }
+
+        // Check if user already exists
+        const existingUser = await Auth.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({
+                success: false,
+                message: "User with this email already exists"
+            });
+        }
+
+        // Hash password
+        const salt = await bcrypt.genSalt(12);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create new admin user
+        const newAdmin = new Auth({
+            userName,
+            email,
+            password: hashedPassword,
+            role
+        });
+
+        await newAdmin.save();
+
+        res.status(201).json({
+            success: true,
+            message: "Admin account created successfully"
+        });
+
+    } catch (error) {
+        console.error('Create admin error:', error);
+        res.status(500).json({
+            success: false,
+            message: "Error creating admin account"
+        });
     }
 };

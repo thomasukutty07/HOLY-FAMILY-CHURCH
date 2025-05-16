@@ -4,13 +4,11 @@ import { Outlet } from "react-router-dom";
 
 const ChurchLayout = () => {
   return (
-    <div className="w-full bg-[#2b2b2b]  pt-10">
-      <div className="flex justify-start md:justify-center items-center">
-        <ClientHeader />
-      </div>
-      <div>
+    <div className="min-h-screen bg-[#0A0A0A]">
+      <ClientHeader />
+      <main className="pt-24">
         <Outlet />
-      </div>
+      </main>
     </div>
   );
 };

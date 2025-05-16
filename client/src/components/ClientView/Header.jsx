@@ -1,81 +1,158 @@
 import { headerItems } from "@/config";
-import React, { useState } from "react";
-import { Link as ScrollLink } from "react-scroll";
-import { MenuIcon } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Link as ScrollLink, scroller } from "react-scroll";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "../ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 
 const ClientHeader = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [open, setOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
-  function handleNavigate(sectionId) {
-    if (sectionId === "/") {
-      navigate("/church/home");
+  useEffect(() => {
+    const handleScroll = () => {
+      const isScrolled = window.scrollY > 20;
+      setScrolled(isScrolled);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleNavigate = (sectionId) => {
+    if (sectionId === "/church/home") {
+      if (location.pathname === "/church/home") {
+        // Already on home, just scroll
+        scroller.scrollTo("home", {
+          duration: 300,
+          smooth: "easeInOutQuart",
+          offset: -100,
+        });
+      } else {
+        navigate("/church/home");
+        setTimeout(() => {
+          scroller.scrollTo("home", {
+            duration: 300,
+            smooth: "easeInOutQuart",
+            offset: -100,
+          });
+        }, 0);
+      }
     } else {
       navigate("/church/home", { state: { scrollTo: sectionId } });
     }
     setOpen(false);
-  }
+  };
+
   return (
-    <header className=" bg-transparent md:bg-white  px-6 md:px-10 py-6 md:py-8 mb-10 mx-4  xl:mx-22 sm:rounded-[40px] flex items-center sm:justify-center justify-start">
-      {/* Left-side drawer menu (mobile) */}
-      <div className="md:hidden">
-        <Drawer open={open} onOpenChange={setOpen} direction="left">
-          <DrawerTrigger asChild>
-            <Button className="cursor-pointer" variant="outline" size="icon">
-              <MenuIcon className="h-6 w-6 " />
-            </Button>
-          </DrawerTrigger>
-          <DrawerContent
-            className="bg-white p-6"
+    <header 
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? "bg-black/80 backdrop-blur-lg py-4" 
+          : "bg-transparent py-6"
+      }`}
+    >
+      <div className="container mx-auto px-6">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <button
+            onClick={() => handleNavigate("/church/home")}
+            className="text-2xl font-compacta text-white hover:text-indigo-400 transition-colors bg-transparent border-none outline-none cursor-pointer"
           >
-            <h2 className="text-xl font-benzin mb-4 text-center">Menu</h2>
-            <ul className="flex flex-col gap-4">
-              {headerItems.map((item) => (
-                <li
-                  key={item.name}
-                  className="font-compacta text-lg text-gray-700 hover:text-black transition"
-                >
+            Holy Family
+          </button>
+
+          {/* Desktop Navigation */}
+          <nav className="hidden md:flex items-center gap-8">
+            {headerItems.map((item) => (
+              <div key={item.name} className="relative group">
+                {item.path === "/church/home" ? (
+                  <button
+                    onClick={() => handleNavigate(item.path)}
+                    className="text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer"
+                  >
+                    {item.name}
+                  </button>
+                ) : (
                   <ScrollLink
                     onClick={() => handleNavigate(item.path)}
                     to={item.path}
+                    spy={true}
                     smooth={true}
-                    duration={100}
-                    className="cursor-pointer block"
+                    duration={1000}
+                    offset={-100}
+                    className="text-gray-300 hover:text-white transition-colors text-lg cursor-pointer flex items-center gap-1"
                   >
                     {item.name}
+                    <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform" />
                   </ScrollLink>
-                </li>
-              ))}
-            </ul>
-          </DrawerContent>
-        </Drawer>
-      </div>
+                )}
+                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-400 group-hover:w-full transition-all duration-300"></div>
+              </div>
+            ))}
+          </nav>
 
-      {/* Nav Items for Desktop */}
-      <ul className="hidden md:flex items-center justify-between gap-6">
-        {headerItems.map((item) => (
-          <li
-            key={item.name}
-            className="font-compacta cursor-pointer text-xl md:text-2xl text-gray-600 hover:text-black transition duration-300"
-          >
-            {item.path === "/" ? (
-              <Link to={item.path}> {item.name} </Link>
-            ) : (
-              <ScrollLink
-                onClick={() => handleNavigate(item.path)}
-                to={item.path}
-                smooth={true}
-                duration={100}
-              >
-                {item.name}
-              </ScrollLink>
-            )}
-          </li>
-        ))}
-      </ul>
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <Drawer open={open} onOpenChange={setOpen} direction="right">
+              <DrawerTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-white hover:text-indigo-400 hover:bg-white/10"
+                >
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </DrawerTrigger>
+              <DrawerContent className="bg-black/95 backdrop-blur-lg border-l border-white/10">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-8">
+                    <span className="text-xl font-compacta text-white">Menu</span>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => setOpen(false)}
+                      className="text-white hover:text-indigo-400 hover:bg-white/10"
+                    >
+                      <X className="h-6 w-6" />
+                    </Button>
+                  </div>
+                  
+                  <nav className="space-y-6">
+                    {headerItems.map((item) => (
+                      <div key={item.name}>
+                        {item.path === "/church/home" ? (
+                          <button
+                            onClick={() => handleNavigate(item.path)}
+                            className="block text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer"
+                          >
+                            {item.name}
+                          </button>
+                        ) : (
+                          <ScrollLink
+                            onClick={() => handleNavigate(item.path)}
+                            to={item.path}
+                            spy={true}
+                            smooth={true}
+                            duration={1000}
+                            offset={-100}
+                            className="block text-gray-300 hover:text-white transition-colors text-lg cursor-pointer"
+                          >
+                            {item.name}
+                          </ScrollLink>
+                        )}
+                      </div>
+                    ))}
+                  </nav>
+                </div>
+              </DrawerContent>
+            </Drawer>
+          </div>
+        </div>
+      </div>
     </header>
   );
 };

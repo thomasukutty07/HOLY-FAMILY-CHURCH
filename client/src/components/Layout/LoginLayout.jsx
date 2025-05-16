@@ -1,15 +1,11 @@
-import React, { useState } from "react";
+import React from "react";
 import { Outlet } from "react-router-dom";
 
 const LoginLayout = () => {
-
   return (
-    <div className="flex pl-40">
-      <div className="flex items-center justify-center h-screen">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-purple-50">
+      <div className="w-full max-w-[450px] p-4">
         <Outlet />
-      </div>
-      <div className="relative w-full flex items-center overflow-hidden">
-        <div className="w-[900px] absolute h-[900px] -right-45 rounded-full from-[#4551df] to-[#11c0c3] bg-gradient-to-bl"></div>
       </div>
     </div>
   );

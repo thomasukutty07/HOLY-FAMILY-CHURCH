@@ -8,12 +8,12 @@ import familyImage from '../assets/family.png'
 export const images = { holy_family, person2, person4, person3, marpapa, familyImage };
 
 export const headerItems = [
-  { name: "Home", path: "/" },
+  { name: "Home", path: "/church/home" },
   { name: "History", path: "history" },
   { name: "Groups", path: "groups" },
   { name: "Events", path: "events" },
   { name: "Contact", path: "contact" },
-  { name: "Birthdays", path: "birthday" }
+  { name: "Birthdays", path: "birthdays" }
 ];
 
 export const leaders = [
@@ -197,7 +197,6 @@ export const addFamilyFormControls = [
     placeholder: "Enter Full Address"
   },
 ];
-
 
 export const addGroupFormControls = [
   {

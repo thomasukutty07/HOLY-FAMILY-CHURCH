@@ -84,73 +84,80 @@ export const useAddMemberLogic = () => {
     }
   }, [publicId, dispatch, resetImageState]);
 
-  // Check the form
-  const getRequiredFields = (formData) => {
-    const defaultOptionalFields = ["imageUrl", "marriageDate", "dateOfDeath"];
-    const exemptRoles = ["vicar", "sister", "mother"];
-    const excludeForExempt = ["group", "family", "marriageDate", "married"];
-
-    const role = formData.role;
-    const allFields = Object.keys(formData);
-    let required = allFields.filter(
-      (key) => !defaultOptionalFields.includes(key)
-    );
-    if (exemptRoles.includes(role)) {
-      required = required.filter((key) => !excludeForExempt.includes(key));
-    }
-    if (!formData.imageUrl) {
-      required = required.filter((key) => key !== "publicId");
-    }
-
-    return required;
-  };
-
   // Form submission logic
   const handleSubmit = useCallback(
     async (event) => {
       event.preventDefault();
-      const required = getRequiredFields(formData);
-      const allRequiredFields = required.every(
-        (key) =>
-          formData[key] !== "" &&
-          formData[key] !== null &&
-          formData[key] !== undefined
-      );
 
-      if (!allRequiredFields) {
-        return toast.error("Fields can't be empty.");
+      let updatedFormData = {
+        ...formData,
+        imageUrl: imageUrl || "",
+        publicId: publicId || "",
+        isActive: formData.isActive === "true" || formData.isActive === true,
+        married: formData.married === "true" || formData.married === true
+      };
+
+      // Log the form data before validation
+      console.log("Form data before validation:", updatedFormData);
+
+      // Using the same validation approach as useCreateGroupLogic
+      const allFieldsFilled = Object.keys(updatedFormData).every((key) => {
+        // Skip validation for optional fields
+        if (
+          key === "imageUrl" ||
+          key === "publicId" ||
+          key === "marriageDate" ||
+          key === "dateOfDeath" ||
+          key === "family" ||
+          key === "group"
+        ) {
+          return true;
+        }
+
+        // Skip fields based on role
+        const exemptRoles = ["vicar", "sister", "mother"];
+        const excludeForExempt = ["group", "family", "marriageDate", "married"];
+
+        if (
+          exemptRoles.includes(updatedFormData.role) &&
+          excludeForExempt.includes(key)
+        ) {
+          return true;
+        }
+
+        const value = updatedFormData[key];
+        return (
+          value !== null && value !== undefined && String(value).trim() !== ""
+        );
+      });
+
+      if (!allFieldsFilled) {
+        console.log("Validation failed. Missing required fields.");
+        return toast.error("Please fill out all the required fields.");
       }
 
       try {
-        const formToSubmit = new FormData();
-        const updatedFormData = { ...formData, imageUrl, publicId };
+        setIsFormSubmitted(true);
+        console.log("Submitting member data:", updatedFormData);
 
-        Object.entries(updatedFormData).forEach(([key, value]) => {
-          formToSubmit.append(key, value ?? "");
-        });
-
-        const response = await dispatch(createMember(formToSubmit));
+        const response = await dispatch(createMember(updatedFormData));
 
         if (response?.payload?.success) {
-          setIsFormSubmitted(true);
-
-          toast.success(
-            response.payload.message || "Member added successfully"
-          );
+          toast.success(response.payload.message || "Member added successfully");
           setFormData(initialFormData);
           resetImageState();
           dispatch(fetchAllMembers());
           setFormKey((prev) => prev + 1);
         } else {
-          const errorMsg =
-            response.payload?.message ||
-            response.error?.message ||
-            "Failed to add member";
+          const errorMsg = response.payload?.message || "Failed to add member";
+          console.error("Member creation failed:", response.payload);
           toast.error(errorMsg);
         }
       } catch (error) {
         console.error("Form submission error:", error);
         toast.error("An error occurred while adding the member");
+      } finally {
+        setIsFormSubmitted(false);
       }
     },
     [formData, imageUrl, publicId, dispatch, resetImageState]
@@ -248,6 +255,7 @@ export const useAddMemberLogic = () => {
 
     uploadImage();
   }, [file, dispatch]);
+
   return {
     formData,
     setFormData,
@@ -265,5 +273,6 @@ export const useAddMemberLogic = () => {
     isDeletingImage,
     imageUrl,
     publicId,
+    isFormSubmitted,
   };
 };

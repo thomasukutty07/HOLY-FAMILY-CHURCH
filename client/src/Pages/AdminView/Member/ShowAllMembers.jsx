@@ -38,8 +38,7 @@ import EditAndDelete from "./EditDeleteMember";
 
 const ShowAllMembers = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [memberToEdit, setMemberToEdit] = useState(null);
-  const [editFormData, setEditFormData] = useState({});
+
   const [filterBy, setFilterBy] = useState("all");
   const [activeGroup, setActiveGroup] = useState("all");
   const [activeFamily, setActiveFamily] = useState("all");
@@ -140,51 +139,6 @@ const ShowAllMembers = () => {
 
     return nameMatch && groupMatch && familyMatch;
   });
-
-  const handleEditMember = (member) => {
-    setMemberToEdit(member);
-    setEditFormData({
-      name: member.name,
-      role: member.role,
-      sex: member.sex,
-      baptismName: member.baptismName || "",
-      dateOfBirth: member.dateOfBirth
-        ? new Date(member.dateOfBirth).toISOString().split("T")[0]
-        : "",
-      marriageDate: member.marriageDate
-        ? new Date(member.marriageDate).toISOString().split("T")[0]
-        : "",
-      family: member.family,
-      group: member.group,
-      dateOfDeath: member.dateOfDeath
-        ? new Date(member.dateOfDeath).toISOString().split("T")[0]
-        : "",
-    });
-  };
-
-  const handleUpdateMember = () => {
-    if (memberToEdit) {
-      dispatch(
-        updateMember({
-          id: memberToEdit._id,
-          ...editFormData,
-        })
-      ).then((data) => {
-        if (data?.payload?.success) {
-          dispatch(fetchAllMembers());
-        }
-      });
-      setMemberToEdit(null);
-    }
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
 
   const exportToCsv = () => {
     const headers = [
@@ -452,13 +406,6 @@ const ShowAllMembers = () => {
                       </TableCell>
                       <TableCell>
                         <EditAndDelete
-                          memberToEdit={memberToEdit}
-                          setMemberToEdit={setMemberToEdit}
-                          editFormData={editFormData}
-                          setEditFormData={setEditFormData}
-                          handleEditMember={handleEditMember}
-                          handleUpdateMember={handleUpdateMember}
-                          handleInputChange={handleInputChange}
                           member={member}
                           familyNames={familyNames}
                           groupNames={groupNames}

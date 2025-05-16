@@ -14,8 +14,11 @@ export const uploadMemberImage = createAsyncThunk(
     async (data, { rejectWithValue }) => {
         try {
             const response = await axios.post(
-                "http://localhost:4000/church/admin/members/upload-image",
-                data
+                "http://localhost:4000/church/members/upload-image",
+                data,
+                {
+                    withCredentials: true,
+                }
             );
             return response?.data;
         } catch (error) {
@@ -30,17 +33,24 @@ export const createMember = createAsyncThunk(
     "admin/createMember",
     async (formData, { rejectWithValue }) => {
         try {
+            console.log("Creating member with data:", formData);
             const response = await axios.post(
-                "http://localhost:4000/church/admin/members",
+                "http://localhost:4000/church/members/members",
                 formData,
                 {
-                    headers: { "Content-Type": "application/json" },
                     withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
                 }
             );
-            return response?.data;
+            console.log("Create member response:", response.data);
+            if (!response.data.success) {
+                return rejectWithValue(response.data);
+            }
+            return response.data;
         } catch (error) {
-            console.error("Error while creating member:", error.message);
+            console.error("Error while creating member:", error);
             return rejectWithValue(error.response?.data || { message: "Something went wrong" });
         }
     }
@@ -52,13 +62,19 @@ export const deleteMemberImage = createAsyncThunk(
         try {
             const imageId = id.replace(/^church\//, "");
             const response = await axios.delete(
-                `http://localhost:4000/church/admin/member/delete-image/${imageId}`
+                `http://localhost:4000/church/members/delete-image/${imageId}`,
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
             );
             return response?.data;
         } catch (error) {
             console.error(error.message);
             return rejectWithValue(
-                error.response?.data || { message: "Failed to delete image" } // 🔧 more accurate error message
+                error.response?.data || { message: "Failed to delete image" }
             );
         }
     }
@@ -68,12 +84,20 @@ export const fetchAllMembers = createAsyncThunk(
     "admin/fetchAllMembers",
     async (_, { rejectWithValue }) => {
         try {
+            console.log("Fetching all members...");
             const response = await axios.get(
-                "http://localhost:4000/church/admin/members"
+                "http://localhost:4000/church/members",
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
             );
+            console.log("Members response:", response.data);
             return response?.data;
         } catch (error) {
-            console.error(error.message);
+            console.error("Error fetching members:", error);
             return rejectWithValue(error.response?.data || { message: "Failed to fetch members" });
         }
     }
@@ -83,7 +107,13 @@ export const fetchFamilyWithMembers = createAsyncThunk(
     async (id, { rejectWithValue }) => {
         try {
             const response = await axios.get(
-                `http://localhost:4000/church/admin/${id}/members`
+                `http://localhost:4000/church/members/${id}/members`,
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
             );
             return response?.data;
         } catch (error) {
@@ -97,15 +127,20 @@ export const updateMember = createAsyncThunk(
     "admin/updateMember",
     async (memberData, { rejectWithValue }) => {
         try {
+            console.log("Updating member with data:", memberData);
             const response = await axios.put(
-                `http://localhost:4000/church/admin/members/update/${memberData.id}`,
+                `http://localhost:4000/church/members/members/update/${memberData.id}`,
                 memberData,
                 {
                     headers: { "Content-Type": "application/json" },
                     withCredentials: true,
                 }
             );
-            return response?.data;
+            console.log("Update member response:", response.data);
+            if (!response.data.success) {
+                return rejectWithValue(response.data);
+            }
+            return response.data;
         } catch (error) {
             console.error("Error while updating member:", error.message);
             return rejectWithValue(error.response?.data || { message: "Failed to update member" });
@@ -117,8 +152,16 @@ export const deleteMember = createAsyncThunk(
     "admin/deleteMember",
     async (memberId, { rejectWithValue }) => {
         try {
-            await axios.delete(`http://localhost:4000/church/admin/members/${memberId}`);
-            return { memberId };
+            const response = await axios.delete(
+                `http://localhost:4000/church/members/members/${memberId}`,
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+            return response?.data;
         } catch (error) {
             console.error("Error while deleting member:", error.message);
             return rejectWithValue(error.response?.data || { message: "Failed to delete member" });

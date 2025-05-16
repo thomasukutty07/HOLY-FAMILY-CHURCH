@@ -338,7 +338,12 @@ const CommonForm = ({
 
   return (
     <Card className="shadow-md border border-gray-100 rounded-xl overflow-hidden">
-      <form onSubmit={onSubmit}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          onSubmit(e);
+        }}
+      >
         <CardContent className="p-6">
           <div
             className={customStyle || "grid grid-cols-1 md:grid-cols-2 gap-4"}
@@ -363,7 +368,7 @@ const CommonForm = ({
         </CardContent>
         <CardFooter className="p-4 border-t flex items-center justify-center">
           <Button
-            type="submit" 
+            type="submit"
             className="bg-indigo-600 cursor-pointer hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center gap-2 shadow-sm"
           >
             {buttonText || "Submit"}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import {
@@ -6,149 +6,236 @@ import {
   SheetClose,
   SheetContent,
   SheetDescription,
-  SheetFooter,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
+  SheetFooter,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Edit, Loader2, Trash2 } from "lucide-react";
 import ConfirmationDialog from "@/components/Common/DeletePopUp";
+import UnsavedChangesAlert from "@/components/Common/Unsave";
 import {
   deleteMember,
   deleteMemberImage,
   fetchAllMembers,
   uploadMemberImage,
+  updateMember,
 } from "@/Store/User/memberSlice";
 import CommonForm from "@/components/Common/Form";
+import { addMemberFormControls } from "@/config";
 
-const EditAndDeleteMember = ({
-  memberToEdit,
-  setMemberToEdit,
-  editFormData,
-  setEditFormData,
-  handleEditMember,
-  handleUpdateMember,
-  member,
-  familyNames,
-  groupNames,
-}) => {
+const EditAndDeleteMember = ({ member, familyNames, groupNames }) => {
   const dispatch = useDispatch();
   const { imageLoading } = useSelector((state) => state.member);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isUnsavedAlertOpen, setIsUnsavedAlertOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null);
+  const [file, setFile] = useState(null);
+  const [memberToEdit, setMemberToEdit] = useState(null);
+  const [editFormData, setEditFormData] = useState({});
+  const [initialFormData, setInitialFormData] = useState(null);
+  const [isFormDirty, setIsFormDirty] = useState(false);
+  const [isDeletingImage, setIsDeletingImage] = useState(false);
+
+  const [selectedFileName, setSelectedFileName] = useState(
+    member?.imageUrl ? member.imageUrl.split("/").pop() : ""
+  );
+  const [currentImageUrl, setCurrentImageUrl] = useState(
+    member?.imageUrl || null
+  );
+  const [currentPublicId, setCurrentPublicId] = useState(
+    member?.publicId || null
+  );
+  const [originalImageUrl, setOriginalImageUrl] = useState(
+    member?.imageUrl || null
+  );
+  const [originalPublicId, setOriginalPublicId] = useState(
+    member?.publicId || null
+  );
+
   const [dialogConfig, setDialogConfig] = useState({
     title: "",
     description: "",
     message: "",
     confirmLabel: "",
   });
-  const [selectedFileName, setSelectedFileName] = useState(
-    member?.imageUrl ? member.imageUrl.split("/").pop() : ""
-  );
-  const [file, setFile] = useState(null);
-  const [isDeletingImage, setIsDeletingImage] = useState(false);
-  // Add missing state for image handling
-  const [imageUrl, setImageUrl] = useState(member?.imageUrl || null);
-  const [publicId, setPublicId] = useState(member?.publicId || null);
 
-  const editFormControls = [
-    {
-      name: "name",
-      label: "Full Name",
-      componentType: "input",
-      type: "text",
-      placeholder: "Enter full name",
-    },
-    {
-      name: "role",
-      label: "Role",
-      componentType: "select",
-      options: [
-        { id: "member", label: "Member" },
-        { id: "vicar", label: "Vicar" },
-        { id: "sister", label: "Sister" },
-        { id: "mother", label: "Mother" },
-        { id: "teacher", label: "Teacher" },
-        { id: "coordinator", label: "Coordinator" },
-        { id: "group-leader", label: "Group Leader" },
-        { id: "group-secretary", label: "Group Secretary" },
-      ],
-    },
-    {
-      name: "sex",
-      label: "Sex",
-      componentType: "select",
-      options: [
-        { id: "male", label: "Male" },
-        { id: "female", label: "Female" },
-      ],
-    },
-    {
-      name: "baptismName",
-      label: "Baptism Name",
-      componentType: "input",
-      type: "text",
-      placeholder: "Enter baptism name",
-    },
-    {
-      name: "dateOfBirth",
-      label: "Date of Birth",
-      componentType: "date",
-    },
-    {
-      name: "isActive",
-      label: "Status",
-      componentType: "select",
-      options: [
-        { id: "true", label: "Active" },
-        { id: "false", label: "Not Active" },
-      ],
-    },
-    {
-      name: "dateOfDeath",
-      label: "Date of Death",
-      componentType: "date",
-    },
-    {
-      name: "married",
-      label: "Marital Status",
-      componentType: "select",
-      options: [
-        { id: "true", label: "Married" },
-        { id: "false", label: "Single" },
-      ],
-    },
-    {
-      name: "marriageDate",
-      label: "Marriage Date",
-      componentType: "date",
-    },
-    {
-      name: "family",
-      label: "Family",
-      componentType: "select",
-      options: familyNames.map((family) => ({
-        id: family._id,
-        label: family.familyName,
-      })),
-    },
-    {
-      name: "group",
-      label: "Group",
-      componentType: "select",
-      options: groupNames.map((group) => ({
-        id: group._id,
-        label: group.groupName,
-      })),
-    },
-    {
-      name: "imageUrl",
-      label: "Profile Image",
-      componentType: "input",
-      type: "file",
-    },
-  ];
+  const editFormControls = addMemberFormControls.map((field) => {
+    if (field.name === "family") {
+      return {
+        ...field,
+        options:
+          familyNames?.map((family) => ({
+            id: family._id,
+            label: family.familyName,
+          })) || [],
+      };
+    } else if (field.name === "group") {
+      return {
+        ...field,
+        options:
+          groupNames?.map((group) => ({
+            id: group._id,
+            label: group.groupName,
+          })) || [],
+      };
+    }
+    return field;
+  });
 
+  const handleEditMember = (member) => {
+    setMemberToEdit(member);
+    const formData = {
+      name: member.name,
+      role: member.role,
+      sex: member.sex,
+      baptismName: member.baptismName || "",
+      dateOfBirth: member.dateOfBirth
+        ? new Date(member.dateOfBirth).toISOString().split("T")[0]
+        : "",
+      marriageDate: member.marriageDate
+        ? new Date(member.marriageDate).toISOString().split("T")[0]
+        : "",
+      family: member.family,
+      group: member.group,
+      dateOfDeath: member.dateOfDeath
+        ? new Date(member.dateOfDeath).toISOString().split("T")[0]
+        : "",
+    };
+    setEditFormData(formData);
+    setInitialFormData(formData);
+  };
+
+  // Update image details when member changes
+  useEffect(() => {
+    if (member) {
+      setOriginalImageUrl(member.imageUrl || null);
+      setOriginalPublicId(member.publicId || null);
+      setCurrentImageUrl(member.imageUrl || null);
+      setCurrentPublicId(member.publicId || null);
+      setSelectedFileName(
+        member.imageUrl ? member.imageUrl.split("/").pop() : ""
+      );
+    }
+  }, [member]);
+
+  // Track form changes
+  useEffect(() => {
+    if (initialFormData && memberToEdit) {
+      const hasDataChanged =
+        JSON.stringify(initialFormData) !== JSON.stringify(editFormData);
+      const hasImageChanged =
+        originalImageUrl !== currentImageUrl ||
+        originalPublicId !== currentPublicId;
+      setIsFormDirty(hasDataChanged || hasImageChanged);
+    }
+  }, [
+    editFormData,
+    initialFormData,
+    currentImageUrl,
+    currentPublicId,
+    originalImageUrl,
+    originalPublicId,
+    memberToEdit,
+  ]);
+
+  // Handle image upload
+  useEffect(() => {
+    if (!file) return;
+
+    const uploadImage = async () => {
+      try {
+        const data = new FormData();
+        data.append("image", file);
+        const response = await dispatch(uploadMemberImage(data));
+
+        if (response?.payload?.success) {
+          setCurrentImageUrl(response.payload.imageUrl);
+          setCurrentPublicId(response.payload.publicId);
+          setEditFormData({
+            ...editFormData,
+            imageUrl: response.payload.imageUrl,
+            publicId: response.payload.publicId,
+          });
+          toast.success("Image uploaded successfully");
+        } else {
+          toast.error(response.payload?.message || "Failed to upload image");
+          resetImageState();
+        }
+      } catch (error) {
+        toast.error("An error occurred while uploading the image");
+        resetImageState();
+      }
+    };
+
+    uploadImage();
+  }, [file, dispatch]);
+
+  // Reset image state to original
+  const resetImageState = () => {
+    setCurrentImageUrl(originalImageUrl);
+    setCurrentPublicId(originalPublicId);
+    setFile(null);
+    setSelectedFileName(
+      originalImageUrl ? originalImageUrl.split("/").pop() : ""
+    );
+  };
+
+  // Reset all form state
+  const resetAllFormState = () => {
+    if (initialFormData) {
+      setEditFormData({ ...initialFormData });
+    }
+    resetImageState();
+    setIsFormDirty(false);
+  };
+
+  // Handle form submission
+  const handleSubmit = () => {
+    if (!memberToEdit?._id) return;
+
+    const updatedMemberData = {
+      id: memberToEdit._id,
+      ...editFormData,
+      imageUrl: currentImageUrl,
+      publicId: currentPublicId,
+    };
+
+    dispatch(updateMember(updatedMemberData)).then((data) => {
+      if (data?.payload?.success) {
+        dispatch(fetchAllMembers());
+        toast.success("Member updated successfully");
+        setIsFormDirty(false);
+      }
+    });
+  };
+
+  // Handle delete image
+  const handleDeleteImage = async () => {
+    setIsDeletingImage(true);
+    try {
+      if (currentPublicId) {
+        await dispatch(deleteMemberImage(currentPublicId));
+      }
+      setCurrentImageUrl(null);
+      setCurrentPublicId(null);
+      setSelectedFileName("");
+      setFile(null);
+      setEditFormData({
+        ...editFormData,
+        imageUrl: null,
+        publicId: null,
+      });
+      toast.success("Image removed successfully");
+    } catch (error) {
+      toast.error("Failed to remove image");
+    } finally {
+      setIsDeletingImage(false);
+    }
+  };
+
+  // Handle delete member
   const handleDeleteMember = (event) => {
     event.stopPropagation();
     setDialogConfig({
@@ -165,9 +252,11 @@ const EditAndDeleteMember = ({
     setIsDeleteDialogOpen(true);
   };
 
+  // Confirm delete
   const handleConfirmDelete = () => {
     if (!member?._id) return;
     setIsDeleteDialogOpen(false);
+
     dispatch(deleteMember(member?._id))
       .then((response) => {
         if (response.error) {
@@ -177,109 +266,45 @@ const EditAndDeleteMember = ({
         toast.success("Member deleted successfully");
         dispatch(fetchAllMembers());
       })
-      .catch((error) => {
-        console.error("Delete error:", error);
+      .catch(() => {
         toast.error("An error occurred while deleting the member");
       });
   };
 
-  const handleDeleteImage = async () => {
-    if (!memberToEdit?._id) return;
-
-    setIsDeletingImage(true);
-
-    try {
-      dispatch(deleteMemberImage(memberToEdit?.publicId)).then((data) => {
-        console.log(data);
-      });
-      const updatedFormData = {
-        ...editFormData,
-        imageUrl: null,
-        publicId: null,
-      };
-
-      // Update editFormData state
-      setEditFormData(updatedFormData);
-      setSelectedFileName("");
-      setFile(null);
-    } catch (error) {
-      console.error("Image deletion error:", error);
-      toast.error("Failed to remove image");
-    } finally {
-      setIsDeletingImage(false);
+  // Handle pending actions with unsaved changes
+  const handlePendingAction = (actionType) => {
+    if (isFormDirty) {
+      setPendingAction(actionType);
+      setIsUnsavedAlertOpen(true);
+    } else {
+      executePendingAction(actionType);
     }
   };
 
-  const resetImageState = () => {
-    setFile(null);
-    setSelectedFileName(
-      member?.imageUrl ? member.imageUrl.split("/").pop() : ""
-    );
-  };
-
-  const handleSubmit = () => {
-    if (!memberToEdit?._id) return;
-    const updatedMemberData = {
-      ...editFormData,
-    };
-    if (imageUrl !== member?.imageUrl) {
-      updatedMemberData.imageUrl = imageUrl;
-      updatedMemberData.publicId = publicId;
+  // Execute pending actions
+  const executePendingAction = (actionType) => {
+    if (actionType === "close") {
+      resetAllFormState();
+      setMemberToEdit(null);
     }
-    handleUpdateMember(updatedMemberData);
+    setPendingAction(null);
   };
 
-  useEffect(() => {
-    if (!file) return;
-
-    const uploadImage = async () => {
-      try {
-        const data = new FormData();
-        data.append("image", file);
-
-        const response = await dispatch(uploadMemberImage(data));
-
-        if (response?.payload?.success) {
-          const uploadedPublicId = response.payload.publicId;
-          const uploadedImageUrl = response.payload.imageUrl;
-
-          setImageUrl(uploadedImageUrl);
-          setPublicId(uploadedPublicId);
-
-          // Also update the form data
-          setEditFormData({
-            ...editFormData,
-            imageUrl: uploadedImageUrl,
-            publicId: uploadedPublicId,
-          });
-
-          toast.success(
-            response.payload.message || "Image uploaded successfully"
-          );
-        } else {
-          toast.error(response.payload?.message || "Failed to upload image");
-          resetImageState();
-        }
-      } catch (error) {
-        console.error("Image upload error:", error);
-        toast.error("An error occurred while uploading the image");
-        resetImageState();
-      }
-    };
-
-    uploadImage();
-  }, [file, dispatch]);
-
-  // Remove the top-level loader condition - we'll only show loaders inside the sheet
+  // Handle sheet open/close
+  const handleSheetChange = (open) => {
+    if (open) {
+      handleEditMember(member);
+    } else {
+      handlePendingAction("close");
+    }
+  };
 
   return (
     <div className="flex items-center gap-2">
       {/* Edit Button */}
       <Sheet
         open={memberToEdit?._id === member?._id}
-        onOpenChange={(open) =>
-          open ? handleEditMember(member) : setMemberToEdit(null)
-        }
+        onOpenChange={handleSheetChange}
       >
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="h-8 w-8">
@@ -298,12 +323,13 @@ const EditAndDeleteMember = ({
             </SheetDescription>
           </SheetHeader>
 
-          {/* Add the CommonForm component here */}
           <div className="py-4">
             {imageLoading ? (
               <div className="flex items-center justify-center p-4 bg-gray-50 rounded-md">
                 <Loader2 className="animate-spin w-6 h-6 text-indigo-600 mr-2" />
-                <span className="text-gray-600">Uploading image...</span>
+                <span className="text-gray-600">
+                  {isDeletingImage ? "Deleting image..." : "Uploading image..."}
+                </span>
               </div>
             ) : (
               <CommonForm
@@ -318,13 +344,23 @@ const EditAndDeleteMember = ({
                 selectedFileName={selectedFileName}
                 setSelectedFileName={setSelectedFileName}
                 isDeletingImage={isDeletingImage}
+                showDeleteImageButton={!!currentImageUrl}
               />
             )}
           </div>
 
           <SheetFooter className="pt-4 border-t mt-4">
             <SheetClose asChild>
-              <Button type="button" variant="outline">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={(e) => {
+                  if (isFormDirty) {
+                    e.preventDefault();
+                    handlePendingAction("close");
+                  }
+                }}
+              >
                 Cancel
               </Button>
             </SheetClose>
@@ -337,14 +373,12 @@ const EditAndDeleteMember = ({
         variant="destructive"
         size="icon"
         className="h-8 w-8"
-        onClick={(event) => {
-          handleDeleteMember(event);
-        }}
+        onClick={handleDeleteMember}
       >
         <Trash2 className="h-4 w-4" />
       </Button>
 
-      {/* Confirmation Dialog */}
+      {/* Confirmation Dialog for Delete Member */}
       <ConfirmationDialog
         open={isDeleteDialogOpen}
         onOpenChange={setIsDeleteDialogOpen}
@@ -353,6 +387,23 @@ const EditAndDeleteMember = ({
         message={dialogConfig.message}
         confirmLabel={dialogConfig.confirmLabel}
         onConfirm={handleConfirmDelete}
+      />
+
+      {/* Unsaved Changes Alert Dialog */}
+      <UnsavedChangesAlert
+        isOpen={isUnsavedAlertOpen}
+        setIsOpen={setIsUnsavedAlertOpen}
+        title="Unsaved Changes"
+        description="You have unsaved changes. Do you want to save them or discard?"
+        onContinueEditing={() => setIsUnsavedAlertOpen(false)}
+        onSaveChanges={() => {
+          handleSubmit();
+          executePendingAction(pendingAction);
+        }}
+        onDiscardChanges={() => {
+          resetAllFormState();
+          executePendingAction(pendingAction);
+        }}
       />
     </div>
   );

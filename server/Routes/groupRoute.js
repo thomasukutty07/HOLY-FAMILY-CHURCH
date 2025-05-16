@@ -4,7 +4,8 @@ import {
     deleteGroup,
     deleteGroupImage,
     fetchAllGroups,
-    uploadGroupImage
+    uploadGroupImage,
+    updateGroup
 } from '../Controllers/groupController.js'
 
 import { upload } from '../Middleware/uploadMiddleware.js'
@@ -16,5 +17,6 @@ router.post("/create-group", createGroup)
 router.post("/upload-image", upload.single("image"), uploadGroupImage)
 router.delete('/delete/:groupId', deleteGroup)
 router.delete('/delete-image/:publicId', deleteGroupImage)
+router.put('/update/:id', updateGroup)
 
 export default router

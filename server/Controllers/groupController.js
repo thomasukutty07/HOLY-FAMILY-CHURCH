@@ -38,9 +38,42 @@ export const createGroup = async (req, res) => {
 }
 export const updateGroup = async (req, res) => {
     try {
+        const { id } = req.params;
+        const { groupName, leaderName, secretaryName, location, imageUrl, publicId } = req.body;
 
+        const updatedFields = {
+            groupName,
+            leaderName,
+            secretaryName,
+            location,
+            imageUrl,
+            publicId
+        };
+
+        const updatedGroup = await Group.findByIdAndUpdate(
+            id,
+            updatedFields,
+            { new: true }
+        );
+
+        if (!updatedGroup) {
+            return res.status(404).json({ 
+                success: false, 
+                message: "Group not found" 
+            });
+        }
+
+        return res.status(200).json({ 
+            success: true, 
+            message: "Group updated successfully", 
+            group: updatedGroup 
+        });
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Error while updating group" })
+        console.error("Update group error:", error);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Error while updating group" 
+        });
     }
 }
 export const deleteGroup = async (req, res) => {

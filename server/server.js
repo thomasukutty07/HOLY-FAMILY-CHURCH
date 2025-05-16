@@ -7,32 +7,70 @@ import memberRouter from '../server/Routes/memberRoute.js';
 import authRouter from '../server/Routes/authRoutes.js';
 import familyRouter from '../server/Routes/familyRoute.js';
 import groupRouter from '../server/Routes/groupRoute.js';
-
+import calendarRouter from '../server/Routes/calendarRoutes.js';
 
 dotenv.config();
 
+// Validate required environment variables
+const requiredEnvVars = ['EMAIL_USER', 'EMAIL_PASS', 'CLIENT_URL', 'JWT_SECRET_KEY'];
+const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+
+if (missingEnvVars.length > 0) {
+    console.error('Missing required environment variables:', missingEnvVars);
+    process.exit(1);
+}
+
 const app = express();
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 4000;
 
 // CORS Configuration
 app.use(cors({
     origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Cookie", "Cache-Control"],
+    allowedHeaders: ["Content-Type", "Authorization", "Cache-Control"],
+    exposedHeaders: ["Set-Cookie"],
     credentials: true,
+    preflightContinue: false,
+    optionsSuccessStatus: 204
 }));
 
+// Middleware
 app.use(express.json());
 app.use(cookieParser());
-app.use("/church/admin", memberRouter);
+
+// Request logging middleware
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+
+// Routes
 app.use("/church/auth", authRouter);
-app.use("/church/family", familyRouter);
+app.use("/church/members", memberRouter);
+app.use("/church/families", familyRouter);
 app.use("/church/groups", groupRouter);
+app.use("/church/calendar", calendarRouter);
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    // console.error('Server error:', err);
+    res.status(500).json({
+        success: false,
+        message: "Internal server error"
+    });
+});
+
 // Start server
 function startServer() {
-    connectDb();
-    app.listen(PORT, () => {
-        console.log(`Server running on port ${PORT}`);
-    });
+    try {
+        connectDb();
+        app.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+    } catch (error) {
+        // console.error('Failed to start server:', error);
+        process.exit(1);
+    }
 }
+
 startServer();

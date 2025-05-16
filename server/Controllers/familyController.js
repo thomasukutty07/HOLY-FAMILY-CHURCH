@@ -31,8 +31,6 @@ export const uploadFamilyImage = async (req, res) => {
 export const createFamily = async (req, res) => {
     try {
         const { familyName, group, imageUrl, publicId, contactNo, address, location, headOfFamily } = req.body
-        console.log(publicId);
-
         const newFamily = new Family({
             familyName, group, imageUrl, publicId, contactNo, address, headOfFamily, location
         })
@@ -48,7 +46,13 @@ export const createFamily = async (req, res) => {
 }
 export const updateFamily = async (req, res) => {
     try {
-
+        const { familyId } = req.params
+        const { familyName, group, imageUrl, publicId, contactNo, address, location, headOfFamily } = req.body
+        const updatedFields = {
+            familyName, group, imageUrl, publicId, contactNo, address, location, headOfFamily
+        }
+        const updatedFamily = await Family.findByIdAndUpdate(familyId, updatedFields, { new: true })
+        res.status(200).json({ success: true, message: "Family Updated", family: updatedFamily })
     } catch (error) {
         return res.status(500).json({ success: false, message: "Failed to update family" })
 
@@ -76,26 +80,40 @@ export const deleteFamily = async (req, res) => {
 }
 export const fetchAllFamily = async (req, res) => {
     try {
-        const families = await Family.find({})
+        console.log("Fetching all families...");
+        const families = await Family.find({});
+        console.log("Found families:", families);
+        
         if (families.length === 0) {
-            return res.status(404).json({ success: false, message: "No families found" })
+            return res.status(404).json({ 
+                success: false, 
+                message: "No families found" 
+            });
         }
 
         const familyWithMemberCount = await Promise.all(
             families.map(async (family) => {
-                const memberCount = await Member.countDocuments({ family: family._id })
+                const memberCount = await Member.countDocuments({ family: family._id });
                 return {
                     ...family.toObject(),
                     totalMembers: memberCount
-                }
+                };
             })
-        )
-        return res.status(200).json({ success: true, families: familyWithMemberCount })
+        );
+        
+        console.log("Families with member count:", familyWithMemberCount);
+        return res.status(200).json({ 
+            success: true, 
+            families: familyWithMemberCount 
+        });
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Failed to delete family" })
-
+        console.error("Error in fetchAllFamily:", error);
+        return res.status(500).json({ 
+            success: false, 
+            message: "Failed to fetch families" 
+        });
     }
-}
+};
 export const deleteFamilyImage = async (req, res) => {
     try {
         const { publicId } = req.params

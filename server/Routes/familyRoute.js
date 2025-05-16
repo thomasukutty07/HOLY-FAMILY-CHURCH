@@ -5,6 +5,7 @@ import {
     deleteFamilyImage,
     fetchAllFamily,
     fetchFamilyWithGroup,
+    updateFamily,
     uploadFamilyImage
 } from '../Controllers/familyController.js'
 
@@ -18,5 +19,6 @@ router.post("/upload-image", upload.single("image"), uploadFamilyImage)
 router.delete("/delete-image/:publicId", deleteFamilyImage)
 router.delete("/delete/:familyId", deleteFamily)
 router.get("/:groupId/families", fetchFamilyWithGroup)
+router.put("/update/:familyId", updateFamily)
 
 export default router
