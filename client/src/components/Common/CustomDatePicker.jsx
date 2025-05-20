@@ -32,15 +32,11 @@ const CustomDatePicker = ({ value, onChange, name }) => {
     onChange(newDate.toISOString().split('T')[0]);
   };
 
-  const handleMonthChange = (e, month) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleMonthChange = (month) => {
     setCurrentMonth(parseInt(month));
   };
 
-  const handleYearChange = (e, year) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleYearChange = (year) => {
     setCurrentYear(parseInt(year));
   };
 
@@ -78,6 +74,12 @@ const CustomDatePicker = ({ value, onChange, name }) => {
     return days;
   };
 
+  // Generate years array (100 years back from current year)
+  const years = Array.from({ length: 100 }, (_, i) => {
+    const year = new Date().getFullYear() - i;
+    return year;
+  });
+
   return (
     <div className="">
       <div className="flex items-center gap-2 mb-2">
@@ -96,14 +98,14 @@ const CustomDatePicker = ({ value, onChange, name }) => {
         <div className="flex items-center justify-between mb-3">
           <Select
             value={currentMonth.toString()}
-            onValueChange={(month) => handleMonthChange({ preventDefault: () => {}, stopPropagation: () => {} }, month)}
+            onValueChange={handleMonthChange}
           >
             <SelectTrigger className="w-[110px] h-8 text-sm">
               <SelectValue placeholder="Month" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-[200px] overflow-y-auto bg-white border border-gray-200 rounded-md shadow-sm">
               {Array.from({ length: 12 }, (_, i) => (
-                <SelectItem key={i} value={i.toString()} className="text-sm">
+                <SelectItem key={i} value={i.toString()} className="text-sm hover:bg-gray-100">
                   {format(new Date(2000, i), "MMMM")}
                 </SelectItem>
               ))}
@@ -112,20 +114,17 @@ const CustomDatePicker = ({ value, onChange, name }) => {
 
           <Select
             value={currentYear.toString()}
-            onValueChange={(year) => handleYearChange({ preventDefault: () => {}, stopPropagation: () => {} }, year)}
+            onValueChange={handleYearChange}
           >
             <SelectTrigger className="w-[90px] h-8 text-sm">
               <SelectValue placeholder="Year" />
             </SelectTrigger>
-            <SelectContent>
-              {Array.from({ length: 100 }, (_, i) => {
-                const year = new Date().getFullYear() - i;
-                return (
-                  <SelectItem key={year} value={year.toString()} className="text-sm">
-                    {year}
-                  </SelectItem>
-                );
-              })}
+            <SelectContent className="max-h-[200px] overflow-y-auto bg-white border border-gray-200 rounded-md shadow-sm">
+              {years.map((year) => (
+                <SelectItem key={year} value={year.toString()} className="text-sm hover:bg-gray-100">
+                  {year}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>

@@ -11,26 +11,31 @@ const API_BASE_URL = "http://localhost:4000/church/calendar";
 
 const handleAsyncThunk = async (endpoint, method = "get", data = null, thunkAPI) => {
   try {
+    console.log(`Making ${method.toUpperCase()} request to:`, `${API_BASE_URL}/${endpoint}`);
+    
     const config = {
-      // Only send credentials for non-GET requests (admin operations)
-      ...(method !== "get" && { withCredentials: true }),
-      ...(method === "get" && {
-        headers: {
-          "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        },
-      }),
+      withCredentials: true,
+      headers: {
+        "Content-Type": "application/json",
+      },
     };
 
-    console.log(`Making ${method.toUpperCase()} request to ${API_BASE_URL}/${endpoint}`);
-    
-    const response = method === "get"
-      ? await axios[method](`${API_BASE_URL}/${endpoint}`, config)
-      : await axios[method](`${API_BASE_URL}/${endpoint}`, data, config);
+    let response;
+    if (method === "get") {
+      response = await axios.get(`${API_BASE_URL}/${endpoint}`, config);
+    } else if (method === "delete") {
+      console.log("Making delete request with config:", config);
+      response = await axios.delete(`${API_BASE_URL}/${endpoint}`, config);
+    } else {
+      response = await axios[method](`${API_BASE_URL}/${endpoint}`, data, config);
+    }
 
-    console.log('API Response:', response.data);
+    console.log(`${method.toUpperCase()} response:`, response?.data);
     return response?.data;
   } catch (error) {
-    console.error('API Error:', error.response || error);
+    console.error(`Error in ${method} request:`, error);
+    console.error("Error response:", error.response?.data);
+    console.error("Error status:", error.response?.status);
     return thunkAPI.rejectWithValue(error.response?.data || `${endpoint} failed`);
   }
 };
@@ -73,20 +78,16 @@ const calendarSlice = createSlice({
     const handleRejected = (state, action) => {
       state.loading = false;
       state.error = action.payload?.message || "An error occurred";
-      console.error('Calendar slice error:', action.payload);
     };
 
     builder
-      // Fetch Events
       .addCase(fetchEvents.pending, handlePending)
       .addCase(fetchEvents.fulfilled, (state, action) => {
         handleFulfilled(state, action);
-        console.log('Setting events in state:', action.payload?.events);
         state.events = action.payload?.events || [];
       })
       .addCase(fetchEvents.rejected, handleRejected)
 
-      // Add Event
       .addCase(addEvent.pending, handlePending)
       .addCase(addEvent.fulfilled, (state, action) => {
         handleFulfilled(state, action);
@@ -94,7 +95,6 @@ const calendarSlice = createSlice({
       })
       .addCase(addEvent.rejected, handleRejected)
 
-      // Update Event
       .addCase(updateEvent.pending, handlePending)
       .addCase(updateEvent.fulfilled, (state, action) => {
         handleFulfilled(state, action);
@@ -105,7 +105,6 @@ const calendarSlice = createSlice({
       })
       .addCase(updateEvent.rejected, handleRejected)
 
-      // Delete Event
       .addCase(deleteEvent.pending, handlePending)
       .addCase(deleteEvent.fulfilled, (state, action) => {
         handleFulfilled(state, action);

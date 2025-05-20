@@ -1,7 +1,6 @@
 import {
   AlertDialog,
   AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
@@ -21,10 +20,8 @@ const UnsavedChangesAlert = ({
   onContinueEditing,
   onSaveChanges,
   onDiscardChanges,
-  saveButtonProps = { className: "bg-primary hover:bg-primary/90 text-white" },
-  discardButtonProps = {
-    className: "bg-destructive hover:bg-destructive/90 text-white",
-  },
+  saveButtonProps = { className: "bg-indigo-600 hover:bg-indigo-700 text-white" },
+  discardButtonProps = { className: "bg-red-600 hover:bg-red-700 text-white" },
 }) => {
   const handleContinueEditing = () => {
     setIsOpen(false);
@@ -58,31 +55,27 @@ const UnsavedChangesAlert = ({
           </AlertDialogHeader>
         </div>
 
-        <AlertDialogFooter className="flex-col space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 pt-4 border-t">
-          <AlertDialogCancel
+        <AlertDialogFooter className="flex flex-col space-y-2 sm:flex-row sm:justify-end sm:space-x-2 sm:space-y-0 pt-4 border-t">
+          <AlertDialogAction
             onClick={handleContinueEditing}
-            className="mt-0 border-gray-200 bg-white hover:bg-gray-50"
+            className="mt-0 border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-md font-medium transition-colors"
           >
             {continueEditingLabel}
-          </AlertDialogCancel>
+          </AlertDialogAction>
 
-          <div className="flex flex-col space-y-2 sm:flex-row sm:space-x-2 sm:space-y-0">
-            <AlertDialogAction
-              {...saveButtonProps}
-              onClick={handleSaveChanges}
-              className={`px-4 py-2 rounded-md font-medium transition-colors ${saveButtonProps.className}`}
-            >
-              {saveChangesLabel}
-            </AlertDialogAction>
+          <AlertDialogAction
+            onClick={handleSaveChanges}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${saveButtonProps.className}`}
+          >
+            {saveChangesLabel}
+          </AlertDialogAction>
 
-            <AlertDialogAction
-              {...discardButtonProps}
-              onClick={handleDiscardChanges}
-              className={`px-4 py-2 rounded-md font-medium transition-colors ${discardButtonProps.className}`}
-            >
-              {discardChangesLabel}
-            </AlertDialogAction>
-          </div>
+          <AlertDialogAction
+            onClick={handleDiscardChanges}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${discardButtonProps.className}`}
+          >
+            {discardChangesLabel}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -1,7 +1,7 @@
 import { headerItems } from "@/config";
 import React, { useState, useEffect } from "react";
 import { Link as ScrollLink, scroller } from "react-scroll";
-import { Menu, X, ChevronDown, Church } from "lucide-react";
+import { Menu, X, ChevronDown, Church, LogIn } from "lucide-react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "../ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -22,69 +22,37 @@ const ClientHeader = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleNavigate = (path) => {
-    if (path === "home") {
+  const handleNavigate = (sectionId) => {
+    if (sectionId === "/church/home") {
       if (location.pathname === "/church/home") {
+        // Already on home, just scroll
         scroller.scrollTo("home", {
-          duration: 300,
-          smooth: true,
+          duration: 1000,
+          smooth: "easeInOutQuart",
           offset: -100,
         });
       } else {
         navigate("/church/home");
-        scroller.scrollTo("home", {
-          duration: 300,
-          smooth: true,
-          offset: -100,
-        });
+        setTimeout(() => {
+          scroller.scrollTo("home", {
+            duration: 1000,
+            smooth: "easeInOutQuart",
+            offset: -100,
+          });
+        }, 100);
       }
-    } else if (path === "events") {
-      if (location.pathname === "/church/home") {
-        scroller.scrollTo("events", {
-          duration: 300,
-          smooth: true,
-          offset: -100,
-        });
-      } else {
-        navigate("/church/home");
-        scroller.scrollTo("events", {
-          duration: 300,
-          smooth: true,
-          offset: -100,
-        });
-      }
-    } else if (path === "about") {
+    } else if (sectionId === "about") {
       if (location.pathname === "/church/home") {
         scroller.scrollTo("about", {
-          duration: 300,
-          smooth: true,
+          duration: 1000,
+          smooth: "easeInOutQuart",
           offset: -100,
         });
       } else {
-        navigate("/church/home");
-        scroller.scrollTo("about", {
-          duration: 300,
-          smooth: true,
-          offset: -100,
-        });
-      }
-    } else if (path === "birthdays") {
-      if (location.pathname === "/church/home") {
-        scroller.scrollTo("birthdays", {
-          duration: 300,
-          smooth: true,
-          offset: -100,
-        });
-      } else {
-        navigate("/church/home");
-        scroller.scrollTo("birthdays", {
-          duration: 300,
-          smooth: true,
-          offset: -100,
-        });
+        navigate("/church/home", { state: { scrollTo: "about" } });
       }
     } else {
-      navigate("/church/home", { state: { scrollTo: path } });
+      navigate("/church/home", { state: { scrollTo: sectionId } });
     }
     setOpen(false);
   };
@@ -151,6 +119,13 @@ const ClientHeader = () => {
                 <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-indigo-400 to-purple-400 group-hover:w-full transition-all duration-300"></div>
               </div>
             ))}
+            <Button
+              onClick={() => navigate("/auth/login")}
+              className="bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+            >
+              <LogIn className="h-4 w-4 mr-2" />
+              Admin Login
+            </Button>
           </nav>
 
           {/* Mobile Menu Button */}
@@ -217,6 +192,16 @@ const ClientHeader = () => {
                         <div className="h-px w-0 bg-gradient-to-r from-indigo-400 to-purple-400 group-hover:w-full transition-all duration-300 mt-1"></div>
                       </div>
                     ))}
+                    <Button
+                      onClick={() => {
+                        navigate("/auth/login");
+                        setOpen(false);
+                      }}
+                      className="w-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                    >
+                      <LogIn className="h-4 w-4 mr-2" />
+                      Admin Login
+                    </Button>
                   </nav>
                 </div>
               </DrawerContent>

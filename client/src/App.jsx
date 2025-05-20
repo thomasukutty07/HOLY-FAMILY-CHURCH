@@ -3,7 +3,6 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import HomeLayout from "./components/Layout/HomeLayout";
 import ChurchLayout from "./components/Layout/ChurchLayout";
 import Leaders from "./Pages/ClientView/Leaders";
-import Events from "./Pages/ClientView/Events";
 import AdminLayout from "./components/Layout/AdminLayout";
 import Dashboard from "./Pages/AdminView/Dashboard";
 import AddMember from "./Pages/AdminView/Member/AddMember";
@@ -24,7 +23,7 @@ import ForgotPassword from "./components/Common/ForgotPassword";
 import ResetPassword from "./components/Common/ResetPassword";
 import CreateAdmin from "./Pages/AdminView/CreateAdmin";
 import RoleDetails from "./Pages/ClientView/RoleDetails";
-import Thanks from "./components/ClientView/Thanks";
+import AboutAndHistory from "./components/ClientView/AboutAndHistory";
 
 // New component to check church access
 const CheckChurchAuth = ({ children, isAuthenticated, user }) => {
@@ -77,21 +76,12 @@ const App = () => {
   const renderRoutes = useCallback(() => (
     <Routes>
       {/* Public Church Routes */}
-      <Route 
-        path="/church"
-        element={
-          <CheckChurchAuth isAuthenticated={isAuthenticated} user={user}>
-            <ChurchLayout />
-          </CheckChurchAuth>
-        }
-      >
+      <Route path="/church" element={<ChurchLayout />}>
         <Route index element={<HomeLayout />} />
         <Route path="home" element={<HomeLayout />} />
-        <Route path="leaders">
-          <Route index element={<Leaders />} />
-          <Route path=":role" element={<RoleDetails />} />
-        </Route>
-        <Route path="events" element={<Events />} />
+        <Route path="leaders" element={<Leaders />} />
+        <Route path="about" element={<AboutAndHistory />} />
+        <Route path="role-details" element={<RoleDetails />} />
       </Route>
 
       {/* Protected Admin Routes */}
@@ -116,24 +106,14 @@ const App = () => {
       </Route>
 
       {/* Auth Routes */}
-      <Route
-        path="/auth"
-        element={
-          !isAuthenticated ? (
-            <LoginLayout />
-          ) : (
-            <Navigate to="/admin/dashboard" replace />
-          )
-        }
-      >
+      <Route path="/auth" element={<LoginLayout />}>
         <Route index element={<Navigate to="/auth/login" replace />} />
         <Route path="login" element={<Login />} />
         <Route path="forgot-password" element={<ForgotPassword />} />
-        <Route path="reset-password/:token" element={<ResetPassword />} />
+        <Route path="reset-password" element={<ResetPassword />} />
       </Route>
 
-      {/* Default route - redirect to church home */}
-      <Route path="/" element={<Navigate to="/church/home" replace />} />
+      {/* Catch all route */}
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   ), [isAuthenticated, user]);

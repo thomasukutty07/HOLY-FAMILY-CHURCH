@@ -299,7 +299,13 @@ const EditAndDeleteMember = ({ member, familyNames, groupNames }) => {
     if (open) {
       handleEditMember(member);
     } else {
-      handlePendingAction("close");
+      if (isFormDirty) {
+        setPendingAction("close");
+        setIsUnsavedAlertOpen(true);
+      } else {
+        resetAllFormState();
+        setMemberToEdit(null);
+      }
     }
   };
 
@@ -408,14 +414,26 @@ const EditAndDeleteMember = ({ member, familyNames, groupNames }) => {
         setIsOpen={setIsUnsavedAlertOpen}
         title="Unsaved Changes"
         description="You have unsaved changes. Do you want to save them or discard?"
-        onContinueEditing={() => setIsUnsavedAlertOpen(false)}
-        onSaveChanges={() => {
-          handleSubmit();
+        continueEditingLabel="Continue Editing"
+        saveChangesLabel="Save Changes"
+        discardChangesLabel="Discard Changes"
+        onContinueEditing={() => {
+          setIsUnsavedAlertOpen(false);
+          setPendingAction(null);
+        }}
+        onSaveChanges={async () => {
+          await handleSubmit();
           executePendingAction(pendingAction);
         }}
         onDiscardChanges={() => {
           resetAllFormState();
           executePendingAction(pendingAction);
+        }}
+        saveButtonProps={{
+          className: "bg-indigo-600 hover:bg-indigo-700 text-white"
+        }}
+        discardButtonProps={{
+          className: "bg-red-600 hover:bg-red-700 text-white"
         }}
       />
     </div>

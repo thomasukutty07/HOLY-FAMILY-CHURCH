@@ -21,20 +21,12 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log("Fetching dashboard data...");
-        const results = await Promise.all([
+        await Promise.all([
           dispatch(fetchAllGroupNames()),
           dispatch(fetchAllFamily()),
           dispatch(fetchAllMembers())
         ]);
-        
-        console.log("Dashboard data fetched:", {
-          groups: results[0],
-          families: results[1],
-          members: results[2]
-        });
       } catch (error) {
-        console.error("Error fetching dashboard data:", error);
         toast.error("Failed to load dashboard data. Please try refreshing the page.");
       } finally {
         setLoading(false);
@@ -43,19 +35,6 @@ const Dashboard = () => {
 
     fetchData();
   }, [dispatch]);
-
-  // Debug logs for state values
-  useEffect(() => {
-    console.log("Current state:", {
-      groupNames,
-      familyNames,
-      members,
-      loading,
-      groupLoading,
-      familyLoading,
-      memberLoading
-    });
-  }, [groupNames, familyNames, members, loading, groupLoading, familyLoading, memberLoading]);
 
   const stats = [
     {

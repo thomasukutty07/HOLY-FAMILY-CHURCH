@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchAllMembers, updateMember } from "@/Store/User/memberSlice";
 import { fetchAllGroupNames } from "@/Store/Group/groupSlice";
@@ -21,6 +21,7 @@ import {
   PlusCircle,
   RefreshCw,
   ArrowLeft,
+  LogIn,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -34,15 +35,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fetchAllFamily } from "@/Store/Family/familySlice";
 import { useNavigate } from "react-router-dom";
-import MemberFilter from "@/components/AdminView/MemberFilter";
+import MemberSort from "@/components/AdminView/MemberFilter";
 import EditAndDelete from "./EditDeleteMember";
 
 const ShowAllMembers = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
-  const [filterBy, setFilterBy] = useState("all");
-  const [activeGroup, setActiveGroup] = useState("all");
-  const [activeFamily, setActiveFamily] = useState("all");
+  const [sortBy, setSortBy] = useState("name_asc");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [isRefreshing, setIsRefreshing] = useState(false);
   const navigate = useNavigate();
 
@@ -94,9 +93,6 @@ const ShowAllMembers = () => {
     }
     return age;
   };
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-  };
 
   const getInitials = (name) => {
     return name
@@ -124,22 +120,45 @@ const ShowAllMembers = () => {
     return colors[charSum % colors.length];
   };
 
-  const filteredMembers = members?.filter((member) => {
-    const nameMatch = member.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const groupMatch = activeGroup === "all" || member.group === activeGroup;
-    const familyMatch =
-      activeFamily === "all" || member.family === activeFamily;
+  const filteredAndSortedMembers = useMemo(() => {
+    if (!members) return [];
 
-    if (filterBy === "all") return nameMatch && groupMatch && familyMatch;
-    if (filterBy === "active")
-      return nameMatch && groupMatch && familyMatch && member.isActive;
-    if (filterBy === "inactive")
-      return nameMatch && groupMatch && familyMatch && !member.isActive;
+    let result = [...members];
 
-    return nameMatch && groupMatch && familyMatch;
-  });
+    // Apply search filter
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      result = result.filter(member => 
+        member.name.toLowerCase().includes(term) ||
+        member.role?.toLowerCase().includes(term) ||
+        member.baptismName?.toLowerCase().includes(term)
+      );
+    }
+
+    // Apply sorting
+    return result.sort((a, b) => {
+      switch (sortBy) {
+        case "name_asc":
+          return (a.name || "").localeCompare(b.name || "");
+        case "name_desc":
+          return (b.name || "").localeCompare(a.name || "");
+        case "date_desc":
+          return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
+        case "date_asc":
+          return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+        case "role_asc":
+          return (a.role || "").localeCompare(b.role || "");
+        case "role_desc":
+          return (b.role || "").localeCompare(a.role || "");
+        case "age_desc":
+          return calculateAge(b.dateOfBirth) - calculateAge(a.dateOfBirth);
+        case "age_asc":
+          return calculateAge(a.dateOfBirth) - calculateAge(b.dateOfBirth);
+        default:
+          return 0;
+      }
+    });
+  }, [members, searchTerm, sortBy]);
 
   const exportToCsv = () => {
     const headers = [
@@ -154,7 +173,7 @@ const ShowAllMembers = () => {
       "Status",
     ];
 
-    const csvData = filteredMembers.map((member) => [
+    const csvData = filteredAndSortedMembers.map((member) => [
       member.name,
       member.role,
       member.sex,
@@ -255,28 +274,24 @@ const ShowAllMembers = () => {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 type="text"
-                placeholder="Search by name..."
+                placeholder="Search by name, role, or baptism name..."
                 value={searchTerm}
-                onChange={handleSearch}
+                onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 border-gray-200"
               />
             </div>
 
-            <MemberFilter
-              setFilterBy={setFilterBy}
-              filterBy={filterBy}
-              activeGroup={activeGroup}
-              activeFamily={activeFamily}
-              familyNames={familyNames}
-              groupNames={groupNames}
-              setActiveGroup={setActiveGroup}
-              setActiveFamily={setActiveFamily}
+            <MemberSort
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              sortOrder={sortOrder}
+              setSortOrder={setSortOrder}
             />
           </div>
 
           <div className="text-sm text-gray-500 flex items-center">
             <span className="font-medium text-gray-700 mr-2">
-              {filteredMembers?.length || 0}
+              {filteredAndSortedMembers?.length || 0}
             </span>
             members found
           </div>
@@ -312,8 +327,8 @@ const ShowAllMembers = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredMembers && filteredMembers.length > 0 ? (
-                  filteredMembers.map((member) => (
+                {filteredAndSortedMembers && filteredAndSortedMembers.length > 0 ? (
+                  filteredAndSortedMembers.map((member) => (
                     <TableRow
                       key={member._id}
                       className={`hover:bg-blue-50 transition-colors duration-150 group border-b ${
@@ -455,30 +470,18 @@ const ShowAllMembers = () => {
             </Table>
           </div>
         </CardContent>
-        {filteredMembers && filteredMembers.length > 0 && (
+        {filteredAndSortedMembers && filteredAndSortedMembers.length > 0 && (
           <CardFooter className="flex justify-between items-center py-4 px-6 bg-gray-50 border-t border-gray-100">
             <div className="text-sm text-gray-500">
               Showing{" "}
               <span className="font-medium text-gray-700">
-                {filteredMembers.length}
+                {filteredAndSortedMembers.length}
               </span>{" "}
               of{" "}
               <span className="font-medium text-gray-700">
                 {members.length}
               </span>{" "}
               members
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" className="border-gray-200">
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white border-gray-200"
-              >
-                Next
-              </Button>
             </div>
           </CardFooter>
         )}

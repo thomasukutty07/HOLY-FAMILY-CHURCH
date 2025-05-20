@@ -6,6 +6,12 @@ const BirthdayCard = ({ member, variant = "today" }) => {
   const isToday = variant === "today";
   const age = new Date().getFullYear() - new Date(member.dateOfBirth).getFullYear();
 
+  // Helper function to capitalize first letter
+  const capitalizeFirstLetter = (string) => {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  };
+
   return (
     <div className="group relative flex items-center justify-between p-4 rounded-lg bg-white border border-gray-200 hover:border-gray-300 transition-all duration-200">
       {/* Left Section - Name and Family */}
@@ -29,7 +35,7 @@ const BirthdayCard = ({ member, variant = "today" }) => {
             {member.name}
           </h3>
           <p className="text-sm text-gray-600">
-            {member.family?.familyName || "No Family"}
+            {member.family?.familyName || capitalizeFirstLetter(member.role)}
           </p>
         </div>
       </div>

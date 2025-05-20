@@ -83,15 +83,21 @@ export const updateEvent = async (req, res) => {
 // @access  Private
 export const deleteEvent = async (req, res) => {
   try {
+    console.log('Attempting to delete event with ID:', req.params.id);
+    
     const event = await Calendar.findById(req.params.id);
+    console.log('Found event:', event ? 'Yes' : 'No');
 
     if (!event) {
+      console.log('Event not found');
       return res.status(404).json({ success: false, message: "Event not found" });
     }
 
     await event.deleteOne();
+    console.log('Event deleted successfully');
     res.json({ success: true, eventId: req.params.id });
   } catch (error) {
+    console.error('Error deleting event:', error);
     res.status(500).json({ success: false, message: error.message });
   }
 }; 

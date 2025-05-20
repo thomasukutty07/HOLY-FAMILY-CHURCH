@@ -184,19 +184,15 @@ export const deleteMember = async (req, res) => {
 // Get birthdays
 export const getBirthdays = async (req, res) => {
     try {
-        console.log("Fetching birthdays...");
         const members = await Member.find({ dateOfBirth: { $exists: true } })
             .populate('family')
-            .select('name dateOfBirth family');
+            .select('name dateOfBirth family role');
             
-        console.log("Found members:", members);
-        
         res.status(200).json({
             success: true,
             members: members
         });
     } catch (error) {
-        console.error("Error in getBirthdays:", error);
         res.status(500).json({
             success: false,
             message: "Error fetching birthdays"
@@ -229,16 +225,43 @@ export const fetchFamilyWithMembers = async (req, res) => {
 export const deleteMemberImage = async (req, res) => {
     try {
         const { publicId } = req.params;
-        const result = await cloudinary.uploader.destroy("church/" + publicId);
+        console.log("Attempting to delete image with publicId:", publicId);
+        
+        if (!publicId) {
+            console.error("No publicId provided");
+            return res.status(400).json({ 
+                success: false, 
+                message: "No image ID provided" 
+            });
+        }
+        
+        // Remove any existing 'church/' prefix to avoid double prefixing
+        const cleanPublicId = publicId.replace(/^church\//, '');
+        const fullPublicId = `church/${cleanPublicId}`;
+        
+        console.log("Deleting image with full publicId:", fullPublicId);
+        const result = await cloudinary.uploader.destroy(fullPublicId);
+        console.log("Cloudinary delete result:", result);
 
         if (result.result === "ok") {
-            return res.status(200).json({ success: true, message: "Image removed successfully." });
+            return res.status(200).json({ 
+                success: true, 
+                message: "Image removed successfully." 
+            });
         } else {
-            return res.status(404).json({ success: false, message: "Image not found or already deleted." });
+            console.error("Image deletion failed:", result);
+            return res.status(404).json({ 
+                success: false, 
+                message: "Image not found or already deleted." 
+            });
         }
-
     } catch (error) {
-        res.status(500).json({ success: false, message: "An error occurred while deleting the image." });
+        console.error("Error deleting image:", error);
+        res.status(500).json({ 
+            success: false, 
+            message: "An error occurred while deleting the image.",
+            error: error.message 
+        });
     }
 };
 

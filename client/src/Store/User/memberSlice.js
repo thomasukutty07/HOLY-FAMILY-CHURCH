@@ -6,6 +6,7 @@ const initialState = {
     groupedFamilyMembers: [],
     imageLoading: false,
     memberLoading: false,
+    error: null,
 };
 
 
@@ -60,7 +61,10 @@ export const deleteMemberImage = createAsyncThunk(
     "admin/deleteMemberImage",
     async (id, { rejectWithValue }) => {
         try {
+            console.log("Attempting to delete image with id:", id);
             const imageId = id.replace(/^church\//, "");
+            console.log("Cleaned imageId:", imageId);
+            
             const response = await axios.delete(
                 `http://localhost:4000/church/members/delete-image/${imageId}`,
                 {
@@ -70,9 +74,16 @@ export const deleteMemberImage = createAsyncThunk(
                     }
                 }
             );
-            return response?.data;
+            console.log("Delete image response:", response.data);
+            
+            if (!response.data.success) {
+                console.error("Delete image failed:", response.data);
+                return rejectWithValue(response.data);
+            }
+            
+            return response.data;
         } catch (error) {
-            console.error(error.message);
+            console.error("Delete image error:", error);
             return rejectWithValue(
                 error.response?.data || { message: "Failed to delete image" }
             );
@@ -188,7 +199,7 @@ const memberSlice = createSlice({
                 state.members = null;
             })
             .addCase(uploadMemberImage.pending, (state) => {
-                state.imageLoading = true
+                state.imageLoading = true;
             })
             .addCase(uploadMemberImage.fulfilled, (state) => {
                 state.imageLoading = false;
@@ -197,13 +208,40 @@ const memberSlice = createSlice({
                 state.imageLoading = false;
             })
             .addCase(deleteMemberImage.pending, (state) => {
-                state.imageLoading = true
+                state.imageLoading = true;
             })
             .addCase(deleteMemberImage.fulfilled, (state) => {
                 state.imageLoading = false;
             })
             .addCase(deleteMemberImage.rejected, (state) => {
                 state.imageLoading = false;
+            })
+            .addCase(createMember.pending, (state) => {
+                state.memberLoading = true;
+            })
+            .addCase(createMember.fulfilled, (state) => {
+                state.memberLoading = false;
+            })
+            .addCase(createMember.rejected, (state) => {
+                state.memberLoading = false;
+            })
+            .addCase(updateMember.pending, (state) => {
+                state.memberLoading = true;
+            })
+            .addCase(updateMember.fulfilled, (state) => {
+                state.memberLoading = false;
+            })
+            .addCase(updateMember.rejected, (state) => {
+                state.memberLoading = false;
+            })
+            .addCase(deleteMember.pending, (state) => {
+                state.memberLoading = true;
+            })
+            .addCase(deleteMember.fulfilled, (state) => {
+                state.memberLoading = false;
+            })
+            .addCase(deleteMember.rejected, (state) => {
+                state.memberLoading = false;
             })
             .addCase(fetchFamilyWithMembers.pending, (state) => {
                 state.memberLoading = true;

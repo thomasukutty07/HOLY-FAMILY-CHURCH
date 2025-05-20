@@ -27,7 +27,7 @@ const initialFormData = {
 };
 
 export const useAddMemberLogic = () => {
-  const { members, memberLoading } = useSelector((state) => state.member);
+  const { members, memberLoading, imageLoading } = useSelector((state) => state.member);
   const { familyNames, familyLoading } = useSelector((state) => state.family);
   const { groupNames, groupLoading } = useSelector((state) => state.group);
   const dispatch = useDispatch();
@@ -70,30 +70,19 @@ export const useAddMemberLogic = () => {
 
     try {
       setIsDeletingImage(true);
-      console.log("Attempting to delete image with publicId:", publicId);
-      
-      const response = await dispatch(deleteMemberImage(publicId)).unwrap();
-      console.log("Delete image response:", response);
-      
-      if (response?.success) {
-        toast.success(response.message || "Image deleted successfully");
+      const response = await dispatch(deleteMemberImage(publicId));
+      if (response?.payload?.success) {
+        toast.success(response.payload.message || "Image deleted successfully");
         resetImageState();
-        setFormData(prev => ({
-          ...prev,
-          imageUrl: "",
-          publicId: ""
-        }));
       } else {
-        console.error("Failed to delete image:", response);
-        toast.error(response?.message || "Failed to delete image");
+        toast.error(response.payload?.message || "Failed to delete image");
       }
     } catch (error) {
-      console.error("Image deletion error:", error);
-      toast.error(error?.message || "An error occurred while deleting the image");
+      toast.error("An error occurred while deleting the image");
     } finally {
       setIsDeletingImage(false);
     }
-  }, [publicId, dispatch, resetImageState, setFormData]);
+  }, [publicId, dispatch, resetImageState]);
 
   // Form submission logic
   const handleSubmit = useCallback(
@@ -107,9 +96,6 @@ export const useAddMemberLogic = () => {
         isActive: formData.isActive === "true" || formData.isActive === true,
         married: formData.married === "true" || formData.married === true
       };
-
-      // Log the form data before validation
-      console.log("Form data before validation:", updatedFormData);
 
       // Using the same validation approach as useCreateGroupLogic
       const allFieldsFilled = Object.keys(updatedFormData).every((key) => {
@@ -143,7 +129,6 @@ export const useAddMemberLogic = () => {
       });
 
       if (!allFieldsFilled) {
-        console.log("Validation failed. Missing required fields.");
         return toast.error("Please fill out all the required fields.");
       }
 
@@ -267,7 +252,7 @@ export const useAddMemberLogic = () => {
     };
 
     uploadImage();
-  }, [file, dispatch]);
+  }, [file, dispatch, resetImageState]);
 
   return {
     formData,
@@ -284,6 +269,7 @@ export const useAddMemberLogic = () => {
     selectedFileName,
     setSelectedFileName,
     isDeletingImage,
+    imageLoading,
     imageUrl,
     publicId,
     isFormSubmitted,

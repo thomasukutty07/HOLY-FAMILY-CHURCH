@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { scroller } from "react-scroll";
-import { Church, Mail, Phone, MapPin, LogIn } from "lucide-react";
+import { Church, Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
   const navigate = useNavigate();
@@ -38,21 +38,6 @@ const Footer = () => {
           offset: -100,
         });
       }
-    } else if (path === "thanks") {
-      if (location.pathname === "/church/home") {
-        scroller.scrollTo("thanks", {
-          duration: 300,
-          smooth: true,
-          offset: -100,
-        });
-      } else {
-        navigate("/church/home");
-        scroller.scrollTo("thanks", {
-          duration: 300,
-          smooth: true,
-          offset: -100,
-        });
-      }
     } else {
       navigate("/church/home", { state: { scrollTo: path } });
     }
@@ -61,7 +46,7 @@ const Footer = () => {
   return (
     <footer className="bg-gray-900 text-gray-300">
       <div className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Church Info */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
@@ -122,14 +107,6 @@ const Footer = () => {
                   Contact
                 </button>
               </li>
-              <li>
-                <button
-                  onClick={() => handleNavigate("thanks")}
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
-                >
-                  Thanks & Credits
-                </button>
-              </li>
             </ul>
           </div>
 
@@ -154,18 +131,6 @@ const Footer = () => {
                 <span>info@holyfamilychurch.org</span>
               </li>
             </ul>
-          </div>
-
-          {/* Admin Login */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Admin Access</h3>
-            <Link
-              to="/auth/login"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-            >
-              <LogIn className="w-5 h-5" />
-              Admin Login
-            </Link>
           </div>
         </div>
 

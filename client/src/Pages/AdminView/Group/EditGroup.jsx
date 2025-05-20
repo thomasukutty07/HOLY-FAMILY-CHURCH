@@ -18,6 +18,7 @@ const EditGroup = ({ currentGroup, isEditSheetOpen, setIsEditSheetOpen, handleGr
     secretaryName: "",
     location: "",
   });
+  const [initialFormData, setInitialFormData] = useState(null);
   const [file, setFile] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
   const [publicId, setPublicId] = useState(null);
@@ -29,18 +30,31 @@ const EditGroup = ({ currentGroup, isEditSheetOpen, setIsEditSheetOpen, handleGr
 
   useEffect(() => {
     if (currentGroup) {
-      setFormData({
+      const initialData = {
         imageUrl: currentGroup.imageUrl || "",
         publicId: currentGroup.publicId || "",
         groupName: currentGroup.groupName || "",
         leaderName: currentGroup.leaderName || "",
         secretaryName: currentGroup.secretaryName || "",
         location: currentGroup.location || "",
-      });
+      };
+      setFormData(initialData);
+      setInitialFormData(initialData);
       setImageUrl(currentGroup.imageUrl || null);
       setPublicId(currentGroup.publicId || null);
     }
   }, [currentGroup]);
+
+  // Track form changes
+  useEffect(() => {
+    if (initialFormData) {
+      const hasDataChanged = JSON.stringify(initialFormData) !== JSON.stringify(formData);
+      const hasImageChanged = 
+        (initialFormData.imageUrl !== imageUrl) || 
+        (initialFormData.publicId !== publicId);
+      setHasUnsavedChanges(hasDataChanged || hasImageChanged);
+    }
+  }, [formData, initialFormData, imageUrl, publicId]);
 
   const resetImageState = () => {
     setFile(null);
@@ -49,6 +63,14 @@ const EditGroup = ({ currentGroup, isEditSheetOpen, setIsEditSheetOpen, handleGr
     setSelectedFileName(null);
     const fileInput = document.getElementById("imageUrl");
     if (fileInput) fileInput.value = "";
+  };
+
+  const resetAllFormState = () => {
+    if (initialFormData) {
+      setFormData({ ...initialFormData });
+    }
+    resetImageState();
+    setHasUnsavedChanges(false);
   };
 
   const handleDeleteImage = async () => {
@@ -201,21 +223,8 @@ const EditGroup = ({ currentGroup, isEditSheetOpen, setIsEditSheetOpen, handleGr
 
   const handleDiscardChanges = () => {
     setShowUnsavedChangesAlert(false);
+    resetAllFormState();
     setIsEditSheetOpen(false);
-    setHasUnsavedChanges(false);
-    // Reset form to initial state
-    if (currentGroup) {
-      setFormData({
-        imageUrl: currentGroup.imageUrl || "",
-        publicId: currentGroup.publicId || "",
-        groupName: currentGroup.groupName || "",
-        leaderName: currentGroup.leaderName || "",
-        secretaryName: currentGroup.secretaryName || "",
-        location: currentGroup.location || "",
-      });
-      setImageUrl(currentGroup.imageUrl || null);
-      setPublicId(currentGroup.publicId || null);
-    }
   };
 
   return (
@@ -291,8 +300,22 @@ const EditGroup = ({ currentGroup, isEditSheetOpen, setIsEditSheetOpen, handleGr
       <UnsavedChangesAlert
         isOpen={showUnsavedChangesAlert}
         setIsOpen={setShowUnsavedChangesAlert}
-        onDiscardChanges={handleDiscardChanges}
+        title="Unsaved Changes"
+        description="You have unsaved changes. Do you want to save them or discard?"
+        continueEditingLabel="Continue Editing"
+        saveChangesLabel="Save Changes"
+        discardChangesLabel="Discard Changes"
+        onContinueEditing={() => {
+          setShowUnsavedChangesAlert(false);
+        }}
         onSaveChanges={handleSaveChanges}
+        onDiscardChanges={handleDiscardChanges}
+        saveButtonProps={{
+          className: "bg-indigo-600 hover:bg-indigo-700 text-white"
+        }}
+        discardButtonProps={{
+          className: "bg-red-600 hover:bg-red-700 text-white"
+        }}
       />
     </>
   );

@@ -19,11 +19,6 @@ export const headerItems = [
     offset: -100,
   },
   {
-    title: "Events",
-    path: "events",
-    offset: -100,
-  },
-  {
     title: "Birthdays",
     path: "birthdays",
     offset: -100,
@@ -37,10 +32,10 @@ export const headerItems = [
 
 export const footerLinks = {
   quickLinks: [
-    { title: "Home", path: "/" },
-    { title: "About", path: "/about" },
-    { title: "Events", path: "/events" },
-    { title: "Contact", path: "/contact" },
+    { title: "Home", path: "/church/home" },
+    { title: "About", path: "/church/about" },
+    { title: "Events", path: "/church/events" },
+    { title: "Contact", path: "/church/contact" },
   ],
   ministries: [
     { title: "Youth Ministry", path: "/ministries/youth" },

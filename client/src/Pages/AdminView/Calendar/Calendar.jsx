@@ -13,18 +13,26 @@ import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
 import { fetchEvents, addEvent, updateEvent, deleteEvent } from "@/Store/Calendar/calendarSlice";
 import { useNavigate } from "react-router-dom";
+import ConfirmationDialog from "@/components/Common/DeletePopUp";
 
 const Calendar = () => {
   const navigate = useNavigate();
   const [date, setDate] = useState(new Date());
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [eventType, setEventType] = useState("general");
   const [eventTitle, setEventTitle] = useState("");
   const [eventDescription, setEventDescription] = useState("");
   const [eventDate, setEventDate] = useState(new Date());
   const [eventTime, setEventTime] = useState("12:00");
+  const [dialogConfig, setDialogConfig] = useState({
+    title: "",
+    description: "",
+    message: "",
+    confirmLabel: "",
+  });
 
   const dispatch = useDispatch();
   const { events, loading } = useSelector((state) => state.calendar);
@@ -108,18 +116,49 @@ const Calendar = () => {
     }
   };
 
-  const handleDeleteEvent = async (eventId) => {
-    if (!confirm("Are you sure you want to delete this event?")) return;
+  const handleDeleteEvent = (eventId) => {
+    if (!eventId) {
+      console.error("No event ID provided for deletion");
+      return;
+    }
+
+    const eventToDelete = events.find(event => event._id === eventId);
+    if (!eventToDelete) {
+      console.error("Event not found:", eventId);
+      return;
+    }
+
+    setSelectedEvent(eventToDelete);
+    setDialogConfig({
+      title: "Delete Event",
+      description: `Are you sure you want to delete "${eventToDelete.title}"?`,
+      message: "This action cannot be undone. The event will be permanently removed from the calendar.",
+      confirmLabel: "Delete Event",
+    });
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedEvent?._id) {
+      console.error("No event selected for deletion");
+      return;
+    }
 
     try {
-      const result = await dispatch(deleteEvent(eventId)).unwrap();
+      console.log("Attempting to delete event:", selectedEvent._id);
+      const result = await dispatch(deleteEvent(selectedEvent._id)).unwrap();
+      console.log("Delete result:", result);
+      
       if (result?.success) {
         toast.success("Event deleted successfully");
+        setIsDeleteDialogOpen(false);
         setIsEditEventOpen(false);
+        resetForm();
       } else {
         throw new Error(result?.message || "Failed to delete event");
       }
     } catch (error) {
+      console.error("Error deleting event:", error);
       toast.error(error.message || "Failed to delete event");
     }
   };
@@ -175,7 +214,7 @@ const Calendar = () => {
         </div>
         <Button
           onClick={() => setIsAddEventOpen(true)}
-          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all duration-200"
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-white"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Event
@@ -357,15 +396,18 @@ const Calendar = () => {
             <Button 
               onClick={handleAddEvent} 
               disabled={loading}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-white"
             >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding...
+                  Adding Event...
                 </>
               ) : (
-                "Add Event"
+                <>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Event
+                </>
               )}
             </Button>
           </DialogFooter>
@@ -451,30 +493,43 @@ const Calendar = () => {
               onClick={() => {
                 if (selectedEvent) {
                   handleDeleteEvent(selectedEvent._id);
-                  setIsEditEventOpen(false);
                 }
               }}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-red-600 hover:bg-red-700 text-white"
             >
               Delete
             </Button>
             <Button 
               onClick={handleEditEvent} 
               disabled={loading}
-              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90"
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 text-white"
             >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Saving...
+                  Saving Changes...
                 </>
               ) : (
-                "Save Changes"
+                <>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  Save Changes
+                </>
               )}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title={dialogConfig.title}
+        description={dialogConfig.description}
+        message={dialogConfig.message}
+        confirmLabel={dialogConfig.confirmLabel}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };

@@ -40,7 +40,6 @@ app.use(cookieParser());
 
 // Request logging middleware
 app.use((req, res, next) => {
-    console.log(`${req.method} ${req.url}`);
     next();
 });
 
@@ -53,7 +52,6 @@ app.use("/church/calendar", calendarRouter);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
-    console.error('Server error:', err);
     res.status(err.status || 500).json({
         success: false,
         message: err.message || "Internal server error",
@@ -69,7 +67,6 @@ function startServer() {
             console.log(`Server running on port ${PORT}`);
         });
     } catch (error) {
-        console.error('Failed to start server:', error);
         process.exit(1);
     }
 }
