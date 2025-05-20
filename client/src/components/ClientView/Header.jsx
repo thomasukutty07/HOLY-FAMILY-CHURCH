@@ -53,6 +53,36 @@ const ClientHeader = () => {
           offset: -100,
         });
       }
+    } else if (path === "about") {
+      if (location.pathname === "/church/home") {
+        scroller.scrollTo("about", {
+          duration: 300,
+          smooth: true,
+          offset: -100,
+        });
+      } else {
+        navigate("/church/home");
+        scroller.scrollTo("about", {
+          duration: 300,
+          smooth: true,
+          offset: -100,
+        });
+      }
+    } else if (path === "birthdays") {
+      if (location.pathname === "/church/home") {
+        scroller.scrollTo("birthdays", {
+          duration: 300,
+          smooth: true,
+          offset: -100,
+        });
+      } else {
+        navigate("/church/home");
+        scroller.scrollTo("birthdays", {
+          duration: 300,
+          smooth: true,
+          offset: -100,
+        });
+      }
     } else {
       navigate("/church/home", { state: { scrollTo: path } });
     }
@@ -110,7 +140,7 @@ const ClientHeader = () => {
                     to={item.path}
                     spy={true}
                     smooth={true}
-                    duration={1000}
+                    duration={300}
                     offset={item.offset}
                     className="text-gray-300 hover:text-white transition-colors text-lg cursor-pointer flex items-center gap-1"
                   >
@@ -177,7 +207,7 @@ const ClientHeader = () => {
                             to={item.path}
                             spy={true}
                             smooth={true}
-                            duration={1000}
+                            duration={300}
                             offset={item.offset}
                             className="block text-gray-300 hover:text-white transition-colors text-lg cursor-pointer w-full text-left"
                           >

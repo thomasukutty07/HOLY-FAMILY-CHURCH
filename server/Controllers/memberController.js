@@ -33,6 +33,8 @@ export const uploadMemberImage = async (req, res) => {
 // Create a new member
 export const createMember = async (req, res) => {
     try {
+        console.log("Creating member with data:", req.body);
+        
         // Validate required fields
         const requiredFields = ['name', 'sex', 'baptismName', 'isActive', 'role'];
         const missingFields = requiredFields.filter(field => {
@@ -41,6 +43,7 @@ export const createMember = async (req, res) => {
         });
         
         if (missingFields.length > 0) {
+            console.log("Missing required fields:", missingFields);
             return res.status(400).json({
                 success: false,
                 message: `Missing required fields: ${missingFields.join(', ')}`
@@ -64,8 +67,12 @@ export const createMember = async (req, res) => {
             }
         });
 
+        console.log("Processed member data:", memberData);
+
         const newMember = new Member(memberData);
         await newMember.save();
+        
+        console.log("Member created successfully:", newMember);
         
         res.status(201).json({
             success: true,
@@ -73,9 +80,11 @@ export const createMember = async (req, res) => {
             data: newMember
         });
     } catch (error) {
+        console.error("Error creating member:", error);
         res.status(500).json({
             success: false,
-            message: error.message
+            message: "Error creating member",
+            error: error.message
         });
     }
 };
@@ -83,12 +92,15 @@ export const createMember = async (req, res) => {
 // Get all members
 export const getAllMembers = async (req, res) => {
     try {
+        console.log("Fetching all members...");
         const members = await Member.find().populate('family');
+        console.log("Found members:", members);
         res.status(200).json({
             success: true,
             members: members
         });
     } catch (error) {
+        console.error("Error in getAllMembers:", error);
         res.status(500).json({
             success: false,
             message: "Error fetching members"
@@ -172,15 +184,19 @@ export const deleteMember = async (req, res) => {
 // Get birthdays
 export const getBirthdays = async (req, res) => {
     try {
+        console.log("Fetching birthdays...");
         const members = await Member.find({ dateOfBirth: { $exists: true } })
             .populate('family')
             .select('name dateOfBirth family');
             
+        console.log("Found members:", members);
+        
         res.status(200).json({
             success: true,
             members: members
         });
     } catch (error) {
+        console.error("Error in getBirthdays:", error);
         res.status(500).json({
             success: false,
             message: "Error fetching birthdays"
@@ -190,15 +206,19 @@ export const getBirthdays = async (req, res) => {
 
 export const fetchFamilyWithMembers = async (req, res) => {
     try {
+        console.log("Fetching family members...");
         const { familyId } = req.params;
+        console.log("Family ID:", familyId);
         
         const members = await Member.find({ family: familyId });
+        console.log("Found members:", members);
         
         res.status(200).json({ 
             success: true, 
             members: members 
         });
     } catch (error) {
+        console.error("Error in fetchFamilyWithMembers:", error);
         res.status(500).json({ 
             success: false, 
             message: "Error occurred while fetching family members" 
@@ -209,46 +229,36 @@ export const fetchFamilyWithMembers = async (req, res) => {
 export const deleteMemberImage = async (req, res) => {
     try {
         const { publicId } = req.params;
-        
-        // Remove any 'church/' prefix if it exists
-        const cleanPublicId = publicId.replace(/^church\//, '');
-        
-        // Add 'church/' prefix for Cloudinary
-        const cloudinaryPublicId = "church/" + cleanPublicId;
-        
-        const result = await cloudinary.uploader.destroy(cloudinaryPublicId);
+        const result = await cloudinary.uploader.destroy("church/" + publicId);
 
         if (result.result === "ok") {
-            return res.status(200).json({ 
-                success: true, 
-                message: "Image removed successfully." 
-            });
+            return res.status(200).json({ success: true, message: "Image removed successfully." });
         } else {
-            return res.status(404).json({ 
-                success: false, 
-                message: "Image not found or already deleted." 
-            });
+            return res.status(404).json({ success: false, message: "Image not found or already deleted." });
         }
 
     } catch (error) {
-        res.status(500).json({ 
-            success: false, 
-            message: "An error occurred while deleting the image.",
-            error: error.message 
-        });
+        res.status(500).json({ success: false, message: "An error occurred while deleting the image." });
     }
 };
 
-// Public endpoint for vicar, coordinator, teacher, sister, mother info
+// Get public members
 export const getPublicMembers = async (req, res) => {
-  try {
-    const publicRoles = ['vicar', 'coordinator', 'teacher', 'sister', 'sister_superior'];
-    const members = await Member.find(
-      { role: { $in: publicRoles }, imageUrl: { $exists: true, $ne: '' } },
-      'name imageUrl role'
-    );
-    res.status(200).json({ members });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch public members' });
-  }
+    try {
+        const publicRoles = ["vicar", "coordinator", "teacher", "sister", "sister_superior"];
+        const members = await Member.find({ role: { $in: publicRoles } })
+            .select('name role imageUrl')
+            .sort({ role: 1 });
+            
+        res.status(200).json({
+            success: true,
+            members: members
+        });
+    } catch (error) {
+        console.error("Error in getPublicMembers:", error);
+        res.status(500).json({
+            success: false,
+            message: "Error fetching public members"
+        });
+    }
 };

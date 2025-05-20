@@ -58,15 +58,13 @@ const Thanks = () => {
                 </h3>
                 <div className="space-y-3">
                   <p className="text-gray-400">
-                    A visionary developer who has masterfully crafted our church's digital presence. His innovative approach combines cutting-edge technology with intuitive design, creating a seamless experience for our community. Through his expertise in modern web development and system architecture, he has built a robust platform that not only serves our current needs but is also scalable for future growth. His commitment to excellence and attention to detail has resulted in a website that truly reflects the spirit and values of Holy Family Church.
+                    A skilled developer who crafted our church's digital platform with expertise in modern web technologies. His work combines elegant design with robust functionality, creating an intuitive experience that serves our community's needs while maintaining scalability for future growth.
                   </p>
                   <div className="flex flex-wrap gap-2 mt-3">
                     <span className="px-3 py-1 bg-indigo-500/20 text-indigo-300 rounded-full text-sm">Web Development</span>
                     <span className="px-3 py-1 bg-purple-500/20 text-purple-300 rounded-full text-sm">UI/UX Design</span>
                     <span className="px-3 py-1 bg-pink-500/20 text-pink-300 rounded-full text-sm">System Architecture</span>
                     <span className="px-3 py-1 bg-blue-500/20 text-blue-300 rounded-full text-sm">Technical Leadership</span>
-                    <span className="px-3 py-1 bg-green-500/20 text-green-300 rounded-full text-sm">Innovation</span>
-                    <span className="px-3 py-1 bg-yellow-500/20 text-yellow-300 rounded-full text-sm">Problem Solving</span>
                   </div>
                 </div>
               </div>

@@ -12,7 +12,8 @@ const API_BASE_URL = "http://localhost:4000/church/calendar";
 const handleAsyncThunk = async (endpoint, method = "get", data = null, thunkAPI) => {
   try {
     const config = {
-      withCredentials: true,
+      // Only send credentials for non-GET requests (admin operations)
+      ...(method !== "get" && { withCredentials: true }),
       ...(method === "get" && {
         headers: {
           "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",

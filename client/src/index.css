@@ -1,8 +1,14 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles can be added below */
 
 :root {
   --background: 0 0% 100%;
   --foreground: 222.2 84% 4.9%;
+  --border: 220 13% 91%;
+  --ring: 215 20% 65%;
   --font-compacta: "Compacta", sans-serif;
   --font-benzin: "Benzin", sans-serif;
   --font-europa: "Europa", sans-serif;
@@ -84,7 +90,8 @@ html {
 
 /* Base Styles */
 * {
-  @apply border-border outline-ring/50;
+  border-color: hsl(var(--border));
+  outline-color: hsl(var(--ring) / 0.5);
 }
 
 body {

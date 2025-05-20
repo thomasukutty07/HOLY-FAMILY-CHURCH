@@ -24,8 +24,8 @@ export const headerItems = [
     offset: -100,
   },
   {
-    title: "Ministries",
-    path: "ministries",
+    title: "Birthdays",
+    path: "birthdays",
     offset: -100,
   },
   {
