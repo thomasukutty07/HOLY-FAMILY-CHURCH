@@ -24,6 +24,7 @@ const CreateGroup = () => {
     isFormSubmitted,
     groupNames,
     familyNames,
+    isUploading,
   } = useCreateGroupLogic();
 
   if (groupLoading || familyLoading || isFormSubmitted) {
@@ -116,6 +117,7 @@ const CreateGroup = () => {
           selectedFileName={selectedFileName}
           setSelectedFileName={setSelectedFileName}
           isDeletingImage={isDeletingImage}
+          isUploading={isUploading}
         />
       </div>
     </div>

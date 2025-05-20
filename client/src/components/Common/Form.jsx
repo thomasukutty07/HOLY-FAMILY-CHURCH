@@ -24,6 +24,8 @@ import {
   Upload,
   Loader2,
 } from "lucide-react";
+import CustomDatePicker from "./CustomDatePicker";
+import { cn } from "@/lib/utils";
 
 const CommonForm = ({
   formControls,
@@ -37,8 +39,11 @@ const CommonForm = ({
   selectedFileName,
   setSelectedFileName,
   isDeletingImage = false,
+  isUploading = false,
 }) => {
   const role = formData.role;
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [open, setOpen] = useState(false);
 
   const getFieldIcon = (fieldName) => {
     const iconMap = {
@@ -61,6 +66,9 @@ const CommonForm = ({
     if (file) {
       setSelectedFileName(file.name);
       setFile(file);
+    } else {
+      setSelectedFileName(null);
+      setFile(null);
     }
   };
 
@@ -93,11 +101,17 @@ const CommonForm = ({
                         htmlFor={control.name}
                         className={`flex items-center justify-center w-full h-10 ${
                           fieldIcon ? "pl-10" : "pl-4"
-                        } bg-white border border-gray-200 hover:bg-gray-50 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-30 rounded-md cursor-pointer text-gray-500`}
+                        } bg-white border border-gray-200 hover:bg-gray-50 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-30 rounded-md cursor-pointer text-gray-500 ${
+                          isUploading ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       >
                         <span className="flex items-center gap-2">
+                          {isUploading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
                           <Upload className="h-4 w-4" />
-                          Choose file
+                          )}
+                          {isUploading ? "Uploading..." : "Choose file"}
                         </span>
                         <Input
                           type="file"
@@ -106,6 +120,7 @@ const CommonForm = ({
                           accept="image/*"
                           className="hidden"
                           onChange={(e) => handleFileChange(e, control.name)}
+                          disabled={isUploading}
                         />
                       </label>
                     </div>
@@ -121,15 +136,15 @@ const CommonForm = ({
                         size="sm"
                         className="h-6 w-6 p-0 rounded-full text-gray-500 hover:text-red-500 hover:bg-red-50"
                         onClick={handleRemoveFile}
-                        disabled={isDeletingImage}
+                        disabled={isDeletingImage || isUploading}
                       >
-                        {isDeletingImage ? (
+                        {isDeletingImage || isUploading ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <X className="h-4 w-4" />
                         )}
                         <span className="sr-only">
-                          {isDeletingImage ? "Deleting..." : "Remove file"}
+                          {isDeletingImage ? "Deleting..." : isUploading ? "Uploading..." : "Remove file"}
                         </span>
                       </Button>
                     </div>
@@ -256,18 +271,12 @@ const CommonForm = ({
         case "date":
           return (
             <div className="relative">
-              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                <Calendar className="h-4 w-4 text-gray-400" />
-              </div>
-              <Input
-                type="date"
+              <CustomDatePicker
+                value={formData[control.name]}
+                onChange={(date) => {
+                  setFormData({ ...formData, [control.name]: date });
+                }}
                 name={control.name}
-                id={control.name}
-                value={value}
-                className="pl-10 bg-white border-gray-200 focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-30 rounded-md"
-                onChange={(e) =>
-                  setFormData({ ...formData, [control.name]: e.target.value })
-                }
               />
             </div>
           );
@@ -276,19 +285,11 @@ const CommonForm = ({
           return null;
       }
     },
-    [
-      formData,
-      role,
-      setFile,
-      setFormData,
-      selectedFileName,
-      isDeletingImage,
-      handleDeleteImage,
-    ]
+    [formData, role, setFile, setFormData, selectedFileName, isDeletingImage, handleDeleteImage, isUploading, currentDate, setCurrentDate, open, setOpen]
   );
 
   const isFieldVisible = (control) => {
-    const restrictedRoles = ["sister", "mother", "vicar"];
+    const restrictedRoles = ["sister", "sister_superior", "vicar"];
     const isRestrictedField = [
       "married",
       "marriageDate",
@@ -336,6 +337,28 @@ const CommonForm = ({
 
   const formGroups = groupFormControls();
 
+  const renderFormControls = () => {
+    return [].concat(
+      formGroups.personal,
+      formGroups.account,
+      formGroups.relationship,
+      formGroups.other
+    ).map((control) => {
+      if (!isFieldVisible(control)) return null;
+      return (
+        <div key={control.name} className="mb-2">
+          <Label
+            htmlFor={control.name}
+            className="text-sm font-medium text-gray-700 mb-1.5 block"
+          >
+            {control.label}
+          </Label>
+          {renderComponentByComponentType(control)}
+        </div>
+      );
+    });
+  };
+
   return (
     <Card className="shadow-md border border-gray-100 rounded-xl overflow-hidden">
       <form
@@ -345,25 +368,8 @@ const CommonForm = ({
         }}
       >
         <CardContent className="p-6">
-          <div
-            className={customStyle || "grid grid-cols-1 md:grid-cols-2 gap-4"}
-          >
-            {[
-              ...formGroups.personal,
-              ...formGroups.account,
-              ...formGroups.relationship,
-              ...formGroups.other,
-            ].map((control) => (
-              <div key={control.name} className="mb-4">
-                <Label
-                  htmlFor={control.name}
-                  className="text-sm font-medium text-gray-700 mb-1 block"
-                >
-                  {control.label}
-                </Label>
-                {renderComponentByComponentType(control)}
-              </div>
-            ))}
+          <div className={customStyle || "grid grid-cols-1 md:grid-cols-2 gap-6"}>
+            {renderFormControls()}
           </div>
         </CardContent>
         <CardFooter className="p-4 border-t flex items-center justify-center">

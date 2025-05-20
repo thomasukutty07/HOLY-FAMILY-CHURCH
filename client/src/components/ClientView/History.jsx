@@ -1,29 +1,34 @@
-import React, { useEffect } from "react";
-import { images } from "@/config";
+import React, { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import { Link } from "react-router-dom";
 import { ArrowRight, Clock, Heart, Users } from "lucide-react";
-import { useSelector, useDispatch } from "react-redux";
-import { fetchAllMembers } from "@/Store/User/memberSlice";
+import axios from "axios";
 
-const History = () => {
-  const dispatch = useDispatch();
-  const { members } = useSelector((state) => state.member) || {};
-  const vicar = members?.find((m) => m.role === "vicar" && m.imageUrl);
-  const coordinators = members?.filter((m) => m.role === "coordinator" && m.imageUrl).slice(0, 5) || [];
+const PUBLIC_ROLES = ["vicar", "coordinator", "teacher", "sister", "sister_superior"];
+
+const AboutUs = () => {
+  const [publicMembers, setPublicMembers] = useState([]);
 
   useEffect(() => {
-    dispatch(fetchAllMembers());
-  }, [dispatch]);
+    axios.get("http://localhost:4000/church/members/public-members")
+      .then(res => setPublicMembers(res.data.members))
+      .catch(() => setPublicMembers([]));
+  }, []);
+
+  const vicar = publicMembers.find(m => m.role?.toLowerCase() === "vicar");
+  const coordinators = publicMembers.filter(m => m.role?.toLowerCase() === "coordinator");
+  const teachers = publicMembers.filter(m => m.role?.toLowerCase() === "teacher");
+  const sisters = publicMembers.filter(m => m.role?.toLowerCase() === "sister");
+  const sisterSuperiors = publicMembers.filter(m => m.role?.toLowerCase() === "sister_superior");
 
   return (
     <div className="min-h-screen py-32 px-6 md:px-20">
       <div className="max-w-7xl mx-auto">
         {/* Section Header */}
         <div className="text-center mb-20">
-          <h2 className="text-sm font-medium text-indigo-400 mb-4">OUR STORY</h2>
+          <h2 className="text-sm font-medium text-indigo-400 mb-4">ABOUT US</h2>
           <h1 className="text-5xl md:text-7xl font-compacta bg-gradient-to-r from-white via-gray-300 to-gray-400 bg-clip-text text-transparent">
-            A Legacy of Faith
+            Our Story
           </h1>
           <p className="max-w-2xl mx-auto mt-6 text-xl text-gray-400">
             Journey through time and discover how our church has grown and evolved,
@@ -83,50 +88,39 @@ const History = () => {
             </div>
           </div>
 
-          {/* Right Column - Vicar & Coordinator Images + Image Gallery */}
-          <div className="relative">
-            {/* Vicar & Coordinator Images */}
-            <div className="flex flex-wrap gap-4 mb-8 justify-center">
-              {vicar && (
-                <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-indigo-400 shadow-lg">
-                  <img src={vicar.imageUrl} alt={vicar.name} className="w-full h-full object-cover" />
-                </div>
-              )}
-              {coordinators.map((coordinator) => (
-                <div key={coordinator._id} className="w-20 h-20 rounded-full overflow-hidden border-4 border-purple-400 shadow-md">
-                  <img src={coordinator.imageUrl} alt={coordinator.name} className="w-full h-full object-cover" />
-                </div>
-              ))}
-            </div>
-            {/* Image Gallery */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="col-span-2">
-                <div className="relative group">
-                  <img
-                    src={images.marpapa}
-                    alt="Church History"
-                    className="w-full h-[400px] object-cover rounded-2xl shadow-lg border border-white/10 group-hover:scale-[1.02] transition-all duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-2xl"></div>
-                </div>
-              </div>
-              <div className="relative group">
+          {/* Right Column - Classic Card Grid with Standard Text Style */}
+          <div className="relative w-full grid grid-cols-2 gap-8 items-stretch">
+            {/* Vicar - Large, left column, spans two rows */}
+            {vicar && (
+              <div className="row-span-2 flex flex-col items-center justify-center bg-white rounded-xl shadow-lg border-2 border-indigo-400 p-4">
                 <img
-                  src={images.person2}
-                  alt="Community"
-                  className="w-full h-[200px] object-cover rounded-2xl shadow-lg border border-white/10 group-hover:scale-[1.02] transition-all duration-500"
+                  src={vicar.imageUrl}
+                  alt={vicar.name}
+                  className="w-full h-[380px] object-cover rounded-lg shadow"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-2xl"></div>
+                <div className="text-center mt-4">
+                  <h3 className="text-2xl font-bold text-gray-900 mb-1">{vicar.name || "Vicar"}</h3>
+                  <p className="text-base text-gray-500 font-medium">{vicar.role || "Vicar"}</p>
+                </div>
               </div>
-              <div className="relative group">
+            )}
+
+            {/* Other Leaders - Simple Card Grid with Standard Text */}
+            {[...coordinators, ...teachers, ...sisters, ...sisterSuperiors].map((member) => (
+              <div
+                key={member._id}
+                className="flex flex-col items-center bg-white rounded-xl shadow-md border border-gray-200 p-3"
+              >
                 <img
-                  src={images.person3}
-                  alt="Events"
-                  className="w-full h-[200px] object-cover rounded-2xl shadow-lg border border-white/10 group-hover:scale-[1.02] transition-all duration-500"
+                  src={member.imageUrl}
+                  alt={member.name}
+                  className="w-full h-[160px] object-cover rounded-lg shadow"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-2xl"></div>
+                <span className="text-base font-semibold text-gray-900 mt-2">{member.name}</span>
+                <span className="text-sm text-gray-500 mt-1">{member.role}</span>
               </div>
-            </div>
+            ))}
+
             {/* Decorative Elements */}
             <div className="absolute -top-6 -right-6 w-32 h-32 bg-indigo-500/20 rounded-full blur-2xl"></div>
             <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-purple-500/20 rounded-full blur-2xl"></div>
@@ -150,4 +144,4 @@ const History = () => {
   );
 };
 
-export default History;
+export default AboutUs;

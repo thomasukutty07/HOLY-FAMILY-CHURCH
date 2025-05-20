@@ -125,126 +125,126 @@ const CreateAdmin = () => {
                 Set up a new administrator account for the church management system
               </p>
             </div>
-          </div>
-          
+            </div>
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="space-y-1">
               <label htmlFor="userName" className="text-sm font-medium text-gray-700">
                 Username
               </label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
-                </div>
+                  </div>
                 <input
-                  type="text"
-                  id="userName"
-                  name="userName"
-                  value={formData.userName}
-                  onChange={handleChange}
-                  placeholder="Enter username"
+                    type="text"
+                    id="userName"
+                    name="userName"
+                    value={formData.userName}
+                    onChange={handleChange}
+                    placeholder="Enter username"
                   className={`w-full pl-10 pr-4 py-2.5 border ${errors.userName ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
                   required
-                />
+                  />
                 {errors.userName && (
                   <p className="mt-1 text-sm text-red-500 animate-fade-in">{errors.userName}</p>
                 )}
               </div>
-            </div>
+              </div>
 
             <div className="space-y-1">
               <label htmlFor="email" className="text-sm font-medium text-gray-700">
                 Email Address
               </label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
-                </div>
+                  </div>
                 <input
-                  type="email"
-                  id="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  placeholder="Enter email"
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter email"
                   className={`w-full pl-10 pr-4 py-2.5 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
                   required
-                />
+                  />
                 {errors.email && (
                   <p className="mt-1 text-sm text-red-500 animate-fade-in">{errors.email}</p>
                 )}
               </div>
-            </div>
+              </div>
 
             <div className="space-y-1">
               <label htmlFor="password" className="text-sm font-medium text-gray-700">
                 Password
               </label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
-                </div>
+                  </div>
                 <input
-                  type="password"
-                  id="password"
-                  name="password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  placeholder="Enter password"
+                    type="password"
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter password"
                   className={`w-full pl-10 pr-4 py-2.5 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
                   required
-                />
+                  />
                 {errors.password && (
                   <p className="mt-1 text-sm text-red-500 animate-fade-in">{errors.password}</p>
                 )}
               </div>
-            </div>
+              </div>
 
             <div className="space-y-1">
               <label htmlFor="confirmPassword" className="text-sm font-medium text-gray-700">
                 Confirm Password
               </label>
               <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
-                </div>
+                  </div>
                 <input
-                  type="password"
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  placeholder="Confirm password"
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    placeholder="Confirm password"
                   className={`w-full pl-10 pr-4 py-2.5 border ${errors.confirmPassword ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
                   required
-                />
+                  />
                 {errors.confirmPassword && (
                   <p className="mt-1 text-sm text-red-500 animate-fade-in">{errors.confirmPassword}</p>
                 )}
               </div>
-            </div>
+              </div>
 
             <button
-              type="submit"
-              disabled={isLoading}
+                type="submit"
+                disabled={isLoading}
               className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2.5 px-4 rounded-xl hover:opacity-90 transition-all duration-200 flex justify-center items-center text-sm font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
-            >
-              {isLoading ? (
-                <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating Admin...
-                </span>
-              ) : (
+              >
+                {isLoading ? (
+                  <span className="flex items-center">
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating Admin...
+                  </span>
+                ) : (
                 <>
                   <Shield className="h-4 w-4 mr-2" />
                   Create Admin Account
                 </>
-              )}
+                )}
             </button>
-          </form>
+            </form>
         </div>
 
         {/* Right side - Decorative Element */}

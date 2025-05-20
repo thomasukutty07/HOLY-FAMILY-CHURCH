@@ -20,12 +20,16 @@ const handleAsyncThunk = async (endpoint, method = "get", data = null, thunkAPI)
       }),
     };
 
+    console.log(`Making ${method.toUpperCase()} request to ${API_BASE_URL}/${endpoint}`);
+    
     const response = method === "get"
       ? await axios[method](`${API_BASE_URL}/${endpoint}`, config)
       : await axios[method](`${API_BASE_URL}/${endpoint}`, data, config);
 
+    console.log('API Response:', response.data);
     return response?.data;
   } catch (error) {
+    console.error('API Error:', error.response || error);
     return thunkAPI.rejectWithValue(error.response?.data || `${endpoint} failed`);
   }
 };
@@ -68,6 +72,7 @@ const calendarSlice = createSlice({
     const handleRejected = (state, action) => {
       state.loading = false;
       state.error = action.payload?.message || "An error occurred";
+      console.error('Calendar slice error:', action.payload);
     };
 
     builder
@@ -75,6 +80,7 @@ const calendarSlice = createSlice({
       .addCase(fetchEvents.pending, handlePending)
       .addCase(fetchEvents.fulfilled, (state, action) => {
         handleFulfilled(state, action);
+        console.log('Setting events in state:', action.payload?.events);
         state.events = action.payload?.events || [];
       })
       .addCase(fetchEvents.rejected, handleRejected)

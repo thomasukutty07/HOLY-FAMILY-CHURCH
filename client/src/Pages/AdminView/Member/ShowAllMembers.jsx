@@ -20,6 +20,7 @@ import {
   Download,
   PlusCircle,
   RefreshCw,
+  ArrowLeft,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -192,6 +193,14 @@ const ShowAllMembers = () => {
         <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-t-lg pb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 pt-2">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/admin/dashboard")}
+                className="text-white hover:bg-white/20"
+              >
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Back
+              </Button>
               <div className="bg-white/20 p-2 rounded-lg">
                 <Users className="h-6 w-6 text-white" />
               </div>

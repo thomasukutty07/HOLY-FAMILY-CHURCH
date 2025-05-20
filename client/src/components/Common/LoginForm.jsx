@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import { loginUser } from "@/Store/User/authSlice";
 import { useDispatch } from "react-redux";
 import { toast } from "sonner";
-import { Mail, Lock, Church } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Mail, Lock, Church, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -14,6 +15,7 @@ const LoginForm = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
@@ -54,6 +56,7 @@ const LoginForm = () => {
       const result = await dispatch(loginUser(formData)).unwrap();
       if (result.success) {
         toast.success(result.message || "Login successful");
+        navigate("/admin/dashboard");
       } else {
         toast.error(result.message || "Login failed");
       }
@@ -66,6 +69,15 @@ const LoginForm = () => {
 
   return (
     <div className="w-full flex flex-col gap-8 relative">
+      {/* Back Button */}
+      <button
+        onClick={() => navigate("/church/home")}
+        className="absolute -top-12 left-0 flex items-center gap-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>Back to Home</span>
+      </button>
+
       {/* Animated Background */}
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 opacity-50 -z-10">
         <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
@@ -122,33 +134,33 @@ const LoginForm = () => {
               <Lock className="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors duration-200" />
             </div>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               id="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className={`w-full pl-10 pr-4 py-3 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
+              className={`w-full pl-10 pr-12 py-3 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
               required
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-indigo-500 transition-colors duration-200"
+            >
+              {showPassword ? (
+                <EyeOff className="h-5 w-5" />
+              ) : (
+                <Eye className="h-5 w-5" />
+              )}
+            </button>
             {errors.password && (
               <p className="mt-1 text-sm text-red-500 animate-fade-in">{errors.password}</p>
             )}
           </div>
         </div>
         
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded transition-colors duration-200"
-            />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-              Remember me
-            </label>
-          </div>
+        <div className="flex justify-end">
           <Link to="/auth/forgot-password" className="text-sm font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200">
             Forgot password?
           </Link>

@@ -39,6 +39,7 @@ export const useAddMemberLogic = () => {
   const [formKey, setFormKey] = useState(0);
   const [selectedFileName, setSelectedFileName] = useState(null);
   const [isDeletingImage, setIsDeletingImage] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Flag to track form submission status
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
@@ -49,6 +50,7 @@ export const useAddMemberLogic = () => {
     setImageUrl(null);
     setPublicId(null);
     setSelectedFileName(null);
+    setIsUploading(false);
 
     // Clean up sessionStorage
     sessionStorage.removeItem("tempMemberImagePublicId");
@@ -68,21 +70,30 @@ export const useAddMemberLogic = () => {
 
     try {
       setIsDeletingImage(true);
-      const response = await dispatch(deleteMemberImage(publicId));
-      if (response?.payload?.success) {
-        toast.success(response.payload.message || "Image deleted successfully");
+      console.log("Attempting to delete image with publicId:", publicId);
+      
+      const response = await dispatch(deleteMemberImage(publicId)).unwrap();
+      console.log("Delete image response:", response);
+      
+      if (response?.success) {
+        toast.success(response.message || "Image deleted successfully");
         resetImageState();
+        setFormData(prev => ({
+          ...prev,
+          imageUrl: "",
+          publicId: ""
+        }));
       } else {
-        console.error("Image deletion failed:", response);
-        toast.error(response.payload?.message || "Failed to delete image");
+        console.error("Failed to delete image:", response);
+        toast.error(response?.message || "Failed to delete image");
       }
     } catch (error) {
       console.error("Image deletion error:", error);
-      toast.error("An error occurred while deleting the image");
+      toast.error(error?.message || "An error occurred while deleting the image");
     } finally {
       setIsDeletingImage(false);
     }
-  }, [publicId, dispatch, resetImageState]);
+  }, [publicId, dispatch, resetImageState, setFormData]);
 
   // Form submission logic
   const handleSubmit = useCallback(
@@ -115,7 +126,7 @@ export const useAddMemberLogic = () => {
         }
 
         // Skip fields based on role
-        const exemptRoles = ["vicar", "sister", "mother"];
+        const exemptRoles = ["vicar", "sister", "sister_superior"];
         const excludeForExempt = ["group", "family", "marriageDate", "married"];
 
         if (
@@ -228,9 +239,9 @@ export const useAddMemberLogic = () => {
 
     const uploadImage = async () => {
       try {
+        setIsUploading(true);
         const data = new FormData();
         data.append("image", file);
-
         const response = await dispatch(uploadMemberImage(data));
 
         if (response?.payload?.success) {
@@ -250,6 +261,8 @@ export const useAddMemberLogic = () => {
         console.error("Image upload error:", error);
         toast.error("An error occurred while uploading the image");
         resetImageState();
+      } finally {
+        setIsUploading(false);
       }
     };
 
@@ -274,5 +287,6 @@ export const useAddMemberLogic = () => {
     imageUrl,
     publicId,
     isFormSubmitted,
+    isUploading,
   };
 };

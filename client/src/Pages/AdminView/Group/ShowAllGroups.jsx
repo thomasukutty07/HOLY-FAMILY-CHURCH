@@ -1,7 +1,7 @@
 // All necessary imports
 import { Button } from "@/components/ui/button";
 import { deleteGroup, fetchAllGroupNames } from "@/Store/Group/groupSlice";
-import { Loader2, Users, Clock, ChevronRight, PlusCircle, Search, Download, RefreshCw } from "lucide-react";
+import { Loader2, Users, Clock, ChevronRight, PlusCircle, Search, Download, RefreshCw, ArrowLeft } from "lucide-react";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
@@ -179,6 +179,14 @@ const ShowAllGroups = () => {
         <CardHeader className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-t-lg pb-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 pt-2">
+              <Button
+                variant="ghost"
+                onClick={() => navigate("/admin/dashboard")}
+                className="text-white hover:bg-white/20"
+              >
+                <ArrowLeft className="h-5 w-5 mr-2" />
+                Back
+              </Button>
               <div className="bg-white/20 p-2 rounded-lg">
                 <Users className="h-6 w-6 text-white" />
               </div>
@@ -187,7 +195,7 @@ const ShowAllGroups = () => {
                   Group Directory
                 </CardTitle>
                 <p className="text-blue-100 text-sm mt-1">
-                  Manage your family groups and connections
+                  Complete list of all registered groups with their details
                 </p>
               </div>
             </div>

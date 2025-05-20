@@ -26,6 +26,7 @@ const AddMember = () => {
     isFormSubmitted,
     groupNames,
     familyNames,
+    isUploading,
   } = useAddMemberLogic();
 
   if (memberLoading || groupLoading || familyLoading || isFormSubmitted) {
@@ -120,6 +121,7 @@ const AddMember = () => {
           selectedFileName={selectedFileName}
           setSelectedFileName={setSelectedFileName}
           isDeletingImage={isDeletingImage}
+          isUploading={isUploading}
         />
       </div>
     </div>

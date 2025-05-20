@@ -102,6 +102,10 @@ const EditAndDeleteMember = ({ member, familyNames, groupNames }) => {
       dateOfDeath: member.dateOfDeath
         ? new Date(member.dateOfDeath).toISOString().split("T")[0]
         : "",
+      married: member.married ? "true" : "false",
+      isActive: member.isActive ? "true" : "false",
+      imageUrl: member.imageUrl || "",
+      publicId: member.publicId || ""
     };
     setEditFormData(formData);
     setInitialFormData(formData);
@@ -305,13 +309,22 @@ const EditAndDeleteMember = ({ member, familyNames, groupNames }) => {
       <Sheet
         open={memberToEdit?._id === member?._id}
         onOpenChange={handleSheetChange}
+        modal={true}
       >
         <SheetTrigger asChild>
           <Button variant="outline" size="icon" className="h-8 w-8">
             <Edit className="h-4 w-4" />
           </Button>
         </SheetTrigger>
-        <SheetContent className="w-[500px] sm:max-w-[95vw] md:max-w-[500px] overflow-y-auto">
+        <SheetContent 
+          className="w-[500px] sm:max-w-[95vw] md:max-w-[500px] overflow-y-auto"
+          onInteractOutside={(e) => {
+            // Prevent closing when interacting with the calendar
+            if (e.target.closest('[data-radix-popper-content-wrapper]')) {
+              e.preventDefault();
+            }
+          }}
+        >
           <SheetHeader>
             <SheetTitle>
               Edit{" "}

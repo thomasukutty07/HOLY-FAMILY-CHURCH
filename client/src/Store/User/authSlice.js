@@ -12,9 +12,6 @@ const API_BASE_URL = "http://localhost:4000/church/auth";
 
 const handleAsyncThunk = async (endpoint, method = "get", data = null, thunkAPI) => {
     try {
-        console.log('Making request to:', `${API_BASE_URL}/${endpoint}`);
-        console.log('Request data:', data);
-        
         const config = {
             withCredentials: true,
             headers: {
@@ -29,13 +26,8 @@ const handleAsyncThunk = async (endpoint, method = "get", data = null, thunkAPI)
             response = await axios.post(`${API_BASE_URL}/${endpoint}`, data, config);
         }
 
-        console.log('Response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Request failed:', error);
-        console.error('Error response:', error.response?.data);
-        console.error('Error status:', error.response?.status);
-        
         const errorMessage = error.response?.data?.message || error.message || `${endpoint} failed`;
         return thunkAPI.rejectWithValue({ message: errorMessage });
     }
@@ -43,17 +35,58 @@ const handleAsyncThunk = async (endpoint, method = "get", data = null, thunkAPI)
 
 export const loginUser = createAsyncThunk(
     "auth/login",
-    (formData, thunkAPI) => handleAsyncThunk("login", "post", formData, thunkAPI)
+    (data, thunkAPI) => handleAsyncThunk("login", "post", data, thunkAPI)
+);
+
+export const checkAuth = createAsyncThunk(
+    "auth/check",
+    (_, thunkAPI) => handleAsyncThunk("check-auth", "get", null, thunkAPI)
 );
 
 export const logoutUser = createAsyncThunk(
     "auth/logout",
-    (_, thunkAPI) => handleAsyncThunk("logout", "post", {}, thunkAPI)
-);
-
-export const checkAuth = createAsyncThunk(
-    "auth/checkAuth",
-    (_, thunkAPI) => handleAsyncThunk("check-auth", "get", null, thunkAPI)
+    async (_, thunkAPI) => {
+        try {
+            // Clear client-side storage first
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Make the logout request with credentials
+            const response = await axios.post(
+                `${API_BASE_URL}/logout`,
+                {},
+                {
+                    withCredentials: true,
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
+                }
+            );
+            
+            // Clear any remaining cookies
+            document.cookie.split(";").forEach(cookie => {
+                const [name] = cookie.split("=");
+                document.cookie = `${name.trim()}=;expires=${new Date(0).toUTCString()};path=/`;
+            });
+            
+            return response.data;
+        } catch (error) {
+            // Even if the request fails, clear client state
+            localStorage.clear();
+            sessionStorage.clear();
+            document.cookie.split(";").forEach(cookie => {
+                const [name] = cookie.split("=");
+                document.cookie = `${name.trim()}=;expires=${new Date(0).toUTCString()};path=/`;
+            });
+            
+            // If the server returned a 500 error but we cleared the state, consider it a success
+            if (error.response?.status === 500) {
+                return { success: true, message: "Logged out successfully" };
+            }
+            
+            return thunkAPI.rejectWithValue(error.response?.data || { message: "Logout failed" });
+        }
+    }
 );
 
 const authSlice = createSlice({
@@ -71,7 +104,6 @@ const authSlice = createSlice({
         };
 
         const handleFulfilled = (state, action) => {
-            console.log('Action fulfilled:', action);
             state.loading = false;
             state.isAuthenticated = action.payload?.success || false;
             state.user = action.payload?.user || null;
@@ -79,7 +111,6 @@ const authSlice = createSlice({
         };
 
         const handleRejected = (state, action) => {
-            console.log('Action rejected:', action);
             state.loading = false;
             state.isAuthenticated = false;
             state.user = null;
@@ -93,8 +124,19 @@ const authSlice = createSlice({
             .addCase(checkAuth.pending, handlePending)
             .addCase(checkAuth.fulfilled, handleFulfilled)
             .addCase(checkAuth.rejected, handleRejected)
-            .addCase(logoutUser.fulfilled, handleRejected)
-            .addCase(logoutUser.rejected, handleRejected);
+            .addCase(logoutUser.pending, handlePending)
+            .addCase(logoutUser.fulfilled, (state) => {
+                state.loading = false;
+                state.isAuthenticated = false;
+                state.user = null;
+                state.error = null;
+            })
+            .addCase(logoutUser.rejected, (state) => {
+                state.loading = false;
+                state.isAuthenticated = false;
+                state.user = null;
+                state.error = null;
+            });
     },
 });
 

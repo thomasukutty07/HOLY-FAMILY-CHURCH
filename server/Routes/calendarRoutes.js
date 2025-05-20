@@ -9,15 +9,13 @@ import { authMiddleware } from "../Middleware/authMiddleware.js";
 
 const router = express.Router();
 
-// All routes are protected and require authentication
+// Public route for getting events
+router.get("/events", getEvents);
+
+// Protected routes for managing events
 router.use(authMiddleware);
-
-router.route("/events")
-  .get(getEvents)
-  .post(createEvent);
-
-router.route("/events/:id")
-  .put(updateEvent)
-  .delete(deleteEvent);
+router.post("/events", createEvent);
+router.put("/events/:id", updateEvent);
+router.delete("/events/:id", deleteEvent);
 
 export default router; 

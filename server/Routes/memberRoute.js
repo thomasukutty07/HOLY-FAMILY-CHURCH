@@ -9,7 +9,8 @@ import {
     getBirthdays,
     fetchFamilyWithMembers,
     uploadMemberImage,
-    deleteMemberImage
+    deleteMemberImage,
+    getPublicMembers
 } from '../Controllers/memberController.js';
 import { authMiddleware } from '../Middleware/authMiddleware.js';
 
@@ -17,6 +18,7 @@ const router = express.Router();
 
 // Public routes
 router.get('/birthdays', getBirthdays);
+router.get('/public-members', getPublicMembers);
 
 // Protected routes
 router.use(authMiddleware);
@@ -26,7 +28,7 @@ router.get("/members/:id", getMemberById);
 router.put("/members/update/:id", updateMember);
 router.delete("/members/:id", deleteMember);
 router.post("/upload-image", upload.single("image"), uploadMemberImage);
-router.delete("/member/delete-image/:publicId", deleteMemberImage);
+router.delete("/delete-image/:publicId", deleteMemberImage);
 router.get("/:familyId/members", fetchFamilyWithMembers);
 
 export default router;

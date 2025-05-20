@@ -33,10 +33,12 @@ export const useCreateFamilyLogic = () => {
   const [selectedFileName, setSelectedFileName] = useState(null);
   const [isDeletingImage, setIsDeletingImage] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const dispatch = useDispatch();
   const { familyNames, familyLoading } = useSelector((state) => state.family);
   const { groupNames } = useSelector((state) => state.group);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
 
@@ -56,6 +58,7 @@ export const useCreateFamilyLogic = () => {
     setImageUrl(null);
     setPublicId(null);
     setSelectedFileName(null);
+    setIsUploading(false);
 
     // Clean up sessionStorage
     sessionStorage.removeItem("tempFamilyImagePublicId");
@@ -73,6 +76,7 @@ export const useCreateFamilyLogic = () => {
     setImageUrl(null);
     setPublicId(null);
     setSelectedFileName(null);
+    setIsUploading(false);
     setFormData((prev) => ({
       ...prev,
       imageUrl: "",
@@ -244,6 +248,7 @@ export const useCreateFamilyLogic = () => {
 
     const uploadImage = async () => {
       try {
+        setIsUploading(true);
         const data = new FormData();
         data.append("image", file);
 
@@ -271,6 +276,8 @@ export const useCreateFamilyLogic = () => {
         console.error("Image upload error:", error);
         toast.error("An error occurred while uploading the image");
         resetImageState();
+      } finally {
+        setIsUploading(false);
       }
     };
 
@@ -295,6 +302,7 @@ export const useCreateFamilyLogic = () => {
     imageUrl,
     isSubmitting,
     resetForm,
+    isUploading,
   };
 };
 

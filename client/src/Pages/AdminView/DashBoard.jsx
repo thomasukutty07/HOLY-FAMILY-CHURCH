@@ -6,7 +6,7 @@ import { fetchAllMembers } from "@/Store/User/memberSlice";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Users, UserPlus, UsersRound, Building2, Calendar, Clock, ArrowRight, Shield } from "lucide-react";
+import { Users, UserPlus, UsersRound, Building2, Calendar, Clock, ArrowRight, Shield, AlertTriangle } from "lucide-react";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -141,10 +141,22 @@ const Dashboard = () => {
   if (!groupNames && !familyNames && !members) {
     return (
       <div className="flex flex-col items-center justify-center h-[calc(100vh-105px)] bg-white">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">No Data Available</h2>
-          <p className="text-gray-600 mb-4">Unable to load dashboard data. Please try refreshing the page.</p>
-          <Button onClick={() => window.location.reload()}>Refresh Page</Button>
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto">
+            <AlertTriangle className="h-8 w-8 text-red-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900">Unable to Load Data</h2>
+          <p className="text-gray-600 max-w-md">
+            We're having trouble loading the dashboard data. This could be due to a network issue or server problem.
+          </p>
+          <div className="flex gap-4 justify-center">
+            <Button onClick={() => window.location.reload()} variant="default">
+              Try Again
+            </Button>
+            <Button onClick={() => navigate('/')} variant="outline">
+              Go to Home
+            </Button>
+          </div>
         </div>
       </div>
     );

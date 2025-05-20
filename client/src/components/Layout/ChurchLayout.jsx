@@ -1,5 +1,6 @@
 import React from "react";
 import ClientHeader from "../ClientView/Header";
+import Footer from "../ClientView/Footer";
 import { Outlet } from "react-router-dom";
 
 const ChurchLayout = () => {
@@ -9,6 +10,7 @@ const ChurchLayout = () => {
       <main className="pt-24">
         <Outlet />
       </main>
+      <Footer />
     </div>
   );
 };

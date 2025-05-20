@@ -3,6 +3,7 @@ import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import HomeLayout from "./components/Layout/HomeLayout";
 import ChurchLayout from "./components/Layout/ChurchLayout";
 import Leaders from "./Pages/ClientView/Leaders";
+import Events from "./Pages/ClientView/Events";
 import AdminLayout from "./components/Layout/AdminLayout";
 import Dashboard from "./Pages/AdminView/Dashboard";
 import AddMember from "./Pages/AdminView/Member/AddMember";
@@ -22,6 +23,27 @@ import Calendar from "./Pages/AdminView/Calendar/Calendar";
 import ForgotPassword from "./components/Common/ForgotPassword";
 import ResetPassword from "./components/Common/ResetPassword";
 import CreateAdmin from "./Pages/AdminView/CreateAdmin";
+import RoleDetails from "./Pages/ClientView/RoleDetails";
+import Thanks from "./components/ClientView/Thanks";
+
+// New component to check church access
+const CheckChurchAuth = ({ children, isAuthenticated, user }) => {
+  const navigate = useNavigate();
+  const role = user?.role;
+  const isAdminOrVicar = role === "admin" || role === "vicar";
+
+  useEffect(() => {
+    if (isAuthenticated && isAdminOrVicar) {
+      navigate("/admin/dashboard");
+    }
+  }, [isAuthenticated, isAdminOrVicar, navigate]);
+
+  if (isAuthenticated && isAdminOrVicar) {
+    return null;
+  }
+
+  return <>{children}</>;
+};
 
 const App = () => {
   const { isAuthenticated, user } = useSelector((state) => state.auth);
@@ -32,13 +54,19 @@ const App = () => {
     try {
       const data = await dispatch(checkAuth());
       if (data?.payload?.success && !isAuthenticated) {
-        navigate("/admin/dashboard");
+        if (window.location.pathname.startsWith('/admin')) {
+          navigate("/admin/dashboard");
+        }
       } else if (!data?.payload?.success && isAuthenticated) {
-        navigate("/auth/login");
+        if (window.location.pathname.startsWith('/admin')) {
+          navigate("/auth/login");
+        }
       }
     } catch (error) {
       console.error("Auth check failed:", error);
-      navigate("/auth/login");
+      if (window.location.pathname.startsWith('/admin')) {
+        navigate("/auth/login");
+      }
     }
   }, [dispatch, navigate, isAuthenticated]);
 
@@ -49,10 +77,21 @@ const App = () => {
   const renderRoutes = useCallback(() => (
     <Routes>
       {/* Public Church Routes */}
-      <Route path="/church" element={<ChurchLayout />}>
+      <Route 
+        path="/church"
+        element={
+          <CheckChurchAuth isAuthenticated={isAuthenticated} user={user}>
+            <ChurchLayout />
+          </CheckChurchAuth>
+        }
+      >
         <Route index element={<HomeLayout />} />
         <Route path="home" element={<HomeLayout />} />
-        <Route path="leaders" element={<Leaders />} />
+        <Route path="leaders">
+          <Route index element={<Leaders />} />
+          <Route path=":role" element={<RoleDetails />} />
+        </Route>
+        <Route path="events" element={<Events />} />
       </Route>
 
       {/* Protected Admin Routes */}
@@ -93,6 +132,7 @@ const App = () => {
         <Route path="reset-password/:token" element={<ResetPassword />} />
       </Route>
 
+      {/* Default route - redirect to church home */}
       <Route path="/" element={<Navigate to="/church/home" replace />} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>

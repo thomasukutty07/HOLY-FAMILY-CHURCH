@@ -49,6 +49,7 @@ const ConfirmationDialog = ({
             variant="outline"
             onClick={handleCancel}
             className="mt-2 sm:mt-0 cursor-pointer"
+            aria-label={`Cancel ${title.toLowerCase()}`}
           >
             {cancelLabel}
           </Button>
@@ -61,6 +62,7 @@ const ConfirmationDialog = ({
                 ? "bg-red-600 hover:bg-red-700 cursor-pointer text-white"
                 : ""
             }
+            aria-label={`Confirm ${title.toLowerCase()}`}
           >
             {confirmLabel}
           </Button>

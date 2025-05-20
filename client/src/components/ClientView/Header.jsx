@@ -1,7 +1,7 @@
 import { headerItems } from "@/config";
 import React, { useState, useEffect } from "react";
 import { Link as ScrollLink, scroller } from "react-scroll";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Church } from "lucide-react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "../ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -22,36 +22,48 @@ const ClientHeader = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const handleNavigate = (sectionId) => {
-    if (sectionId === "/church/home") {
+  const handleNavigate = (path) => {
+    if (path === "home") {
       if (location.pathname === "/church/home") {
-        // Already on home, just scroll
         scroller.scrollTo("home", {
           duration: 300,
-          smooth: "easeInOutQuart",
+          smooth: true,
           offset: -100,
         });
       } else {
         navigate("/church/home");
-        setTimeout(() => {
-          scroller.scrollTo("home", {
-            duration: 300,
-            smooth: "easeInOutQuart",
-            offset: -100,
-          });
-        }, 0);
+        scroller.scrollTo("home", {
+          duration: 300,
+          smooth: true,
+          offset: -100,
+        });
+      }
+    } else if (path === "events") {
+      if (location.pathname === "/church/home") {
+        scroller.scrollTo("events", {
+          duration: 300,
+          smooth: true,
+          offset: -100,
+        });
+      } else {
+        navigate("/church/home");
+        scroller.scrollTo("events", {
+          duration: 300,
+          smooth: true,
+          offset: -100,
+        });
       }
     } else {
-      navigate("/church/home", { state: { scrollTo: sectionId } });
+      navigate("/church/home", { state: { scrollTo: path } });
     }
     setOpen(false);
   };
 
   return (
     <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         scrolled 
-          ? "bg-black/80 backdrop-blur-lg py-4" 
+          ? "bg-black/90 backdrop-blur-xl py-3 shadow-lg" 
           : "bg-transparent py-6"
       }`}
     >
@@ -59,22 +71,38 @@ const ClientHeader = () => {
         <div className="flex items-center justify-between">
           {/* Logo */}
           <button
-            onClick={() => handleNavigate("/church/home")}
-            className="text-2xl font-compacta text-white hover:text-indigo-400 transition-colors bg-transparent border-none outline-none cursor-pointer"
+            onClick={() => handleNavigate("home")}
+            className="group flex items-center gap-3"
           >
-            Holy Family
+            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center transform transition-transform duration-300 group-hover:rotate-3 ${
+              scrolled ? 'scale-90' : 'scale-100'
+            }`}>
+              <Church className="w-6 h-6 text-white" />
+            </div>
+            <span className={`font-compacta text-2xl bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent transition-all duration-300 ${
+              scrolled ? 'text-xl' : 'text-2xl'
+            }`}>
+              Holy Family
+            </span>
           </button>
 
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             {headerItems.map((item) => (
-              <div key={item.name} className="relative group">
-                {item.path === "/church/home" ? (
+              <div key={item.title} className="group relative">
+                {item.path === "home" ? (
                   <button
                     onClick={() => handleNavigate(item.path)}
                     className="text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer"
                   >
-                    {item.name}
+                    {item.title}
+                  </button>
+                ) : item.path === "events" ? (
+                  <button
+                    onClick={() => handleNavigate(item.path)}
+                    className="text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer"
+                  >
+                    {item.title}
                   </button>
                 ) : (
                   <ScrollLink
@@ -83,14 +111,14 @@ const ClientHeader = () => {
                     spy={true}
                     smooth={true}
                     duration={1000}
-                    offset={-100}
+                    offset={item.offset}
                     className="text-gray-300 hover:text-white transition-colors text-lg cursor-pointer flex items-center gap-1"
                   >
-                    {item.name}
-                    <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform" />
+                    {item.title}
+                    <ChevronDown className="w-4 h-4 group-hover:rotate-180 transition-transform duration-300" />
                   </ScrollLink>
                 )}
-                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-indigo-400 group-hover:w-full transition-all duration-300"></div>
+                <div className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-indigo-400 to-purple-400 group-hover:w-full transition-all duration-300"></div>
               </div>
             ))}
           </nav>
@@ -107,10 +135,15 @@ const ClientHeader = () => {
                   <Menu className="h-6 w-6" />
                 </Button>
               </DrawerTrigger>
-              <DrawerContent className="bg-black/95 backdrop-blur-lg border-l border-white/10">
+              <DrawerContent className="bg-black/95 backdrop-blur-xl border-l border-white/10">
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-8">
-                    <span className="text-xl font-compacta text-white">Menu</span>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <Church className="w-6 h-6 text-white" />
+                      </div>
+                      <span className="font-compacta text-xl text-white">Menu</span>
+                    </div>
                     <Button 
                       variant="ghost" 
                       size="icon"
@@ -123,13 +156,20 @@ const ClientHeader = () => {
                   
                   <nav className="space-y-6">
                     {headerItems.map((item) => (
-                      <div key={item.name}>
-                        {item.path === "/church/home" ? (
+                      <div key={item.title} className="group">
+                        {item.path === "home" ? (
                           <button
                             onClick={() => handleNavigate(item.path)}
-                            className="block text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer"
+                            className="block text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer w-full text-left"
                           >
-                            {item.name}
+                            {item.title}
+                          </button>
+                        ) : item.path === "events" ? (
+                          <button
+                            onClick={() => handleNavigate(item.path)}
+                            className="block text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer w-full text-left"
+                          >
+                            {item.title}
                           </button>
                         ) : (
                           <ScrollLink
@@ -138,12 +178,13 @@ const ClientHeader = () => {
                             spy={true}
                             smooth={true}
                             duration={1000}
-                            offset={-100}
-                            className="block text-gray-300 hover:text-white transition-colors text-lg cursor-pointer"
+                            offset={item.offset}
+                            className="block text-gray-300 hover:text-white transition-colors text-lg cursor-pointer w-full text-left"
                           >
-                            {item.name}
+                            {item.title}
                           </ScrollLink>
                         )}
+                        <div className="h-px w-0 bg-gradient-to-r from-indigo-400 to-purple-400 group-hover:w-full transition-all duration-300 mt-1"></div>
                       </div>
                     ))}
                   </nav>

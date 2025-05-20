@@ -8,13 +8,65 @@ import familyImage from '../assets/family.png'
 export const images = { holy_family, person2, person4, person3, marpapa, familyImage };
 
 export const headerItems = [
-  { name: "Home", path: "/church/home" },
-  { name: "History", path: "history" },
-  { name: "Groups", path: "groups" },
-  { name: "Events", path: "events" },
-  { name: "Contact", path: "contact" },
-  { name: "Birthdays", path: "birthdays" }
+  {
+    title: "Home",
+    path: "home",
+    offset: -100,
+  },
+  {
+    title: "About",
+    path: "about",
+    offset: -100,
+  },
+  {
+    title: "Events",
+    path: "events",
+    offset: -100,
+  },
+  {
+    title: "Ministries",
+    path: "ministries",
+    offset: -100,
+  },
+  {
+    title: "Contact",
+    path: "contact",
+    offset: -100,
+  },
 ];
+
+export const footerLinks = {
+  quickLinks: [
+    { title: "Home", path: "/" },
+    { title: "About", path: "/about" },
+    { title: "Events", path: "/events" },
+    { title: "Contact", path: "/contact" },
+  ],
+  ministries: [
+    { title: "Youth Ministry", path: "/ministries/youth" },
+    { title: "Music Ministry", path: "/ministries/music" },
+    { title: "Outreach", path: "/ministries/outreach" },
+    { title: "Volunteer", path: "/ministries/volunteer" },
+  ],
+  contact: {
+    address: "123 Church Street, City, State 12345",
+    phone: "(555) 123-4567",
+    email: "info@holyfamilychurch.org",
+  },
+};
+
+export const massTimes = {
+  sunday: ["8:00 AM", "10:00 AM", "12:00 PM"],
+  saturday: ["5:00 PM"],
+  weekdays: ["8:00 AM"],
+};
+
+export const socialLinks = {
+  facebook: "https://facebook.com/holyfamilychurch",
+  twitter: "https://twitter.com/holyfamilychurch",
+  instagram: "https://instagram.com/holyfamilychurch",
+  youtube: "https://youtube.com/holyfamilychurch",
+};
 
 export const leaders = [
   {

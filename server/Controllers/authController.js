@@ -119,15 +119,52 @@ export const loginUser = async (req, res) => {
 // Logout admin user
 export const logoutUser = async (req, res) => {
     try {
-        res.clearCookie("token");
-        res.status(200).json({
+        // Get the token from the request
+        const token = req.cookies.token;
+        
+        if (token) {
+            try {
+                // Verify the token before clearing
+                jwt.verify(token, process.env.JWT_SECRET_KEY);
+            } catch (verifyError) {
+                // If token is invalid, just clear it
+                console.log("Invalid token during logout, proceeding with cookie clear");
+            }
+        }
+
+        // Clear the token cookie with basic options first
+        res.clearCookie("token", {
+            path: "/",
+            httpOnly: true
+        });
+
+        // Then try with additional options
+        res.clearCookie("token", {
+            path: "/",
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict"
+        });
+
+        // Set an empty cookie that expires immediately
+        res.cookie("token", "", {
+            path: "/",
+            httpOnly: true,
+            expires: new Date(0),
+            maxAge: 0
+        });
+
+        return res.status(200).json({
             success: true,
             message: "Logged out successfully"
         });
     } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Error during logout"
+        console.error("Logout error:", error);
+        // Even if there's an error, try to clear the cookie
+        res.clearCookie("token", { path: "/" });
+        return res.status(200).json({
+            success: true,
+            message: "Logged out successfully"
         });
     }
 };

@@ -24,6 +24,7 @@ const CreateFamily = () => {
     groupLoading,
     isFormSubmitted,
     groupNames,
+    isUploading,
   } = useCreateFamilyLogic();
 
   if (familyLoading || groupLoading || isFormSubmitted) {
@@ -73,7 +74,7 @@ const CreateFamily = () => {
             <div className="w-24 h-24 rounded-md overflow-hidden">
               <img
                 src={imageUrl}
-                alt="Member preview"
+                alt="Family preview"
                 className="w-full h-full object-cover"
               />
             </div>
@@ -118,6 +119,7 @@ const CreateFamily = () => {
           selectedFileName={selectedFileName}
           setSelectedFileName={setSelectedFileName}
           isDeletingImage={isDeletingImage}
+          isUploading={isUploading}
         />
       </div>
     </div>

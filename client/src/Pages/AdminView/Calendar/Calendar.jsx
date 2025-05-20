@@ -7,13 +7,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Loader2, Calendar as CalendarIcon } from "lucide-react";
+import { Plus, Loader2, Calendar as CalendarIcon, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 import { format } from "date-fns";
 import { fetchEvents, addEvent, updateEvent, deleteEvent } from "@/Store/Calendar/calendarSlice";
+import { useNavigate } from "react-router-dom";
 
 const Calendar = () => {
+  const navigate = useNavigate();
   const [date, setDate] = useState(new Date());
   const [isAddEventOpen, setIsAddEventOpen] = useState(false);
   const [isEditEventOpen, setIsEditEventOpen] = useState(false);
@@ -30,15 +32,6 @@ const Calendar = () => {
   useEffect(() => {
     dispatch(fetchEvents());
   }, [dispatch]);
-
-  // Add debugging logs
-  useEffect(() => {
-    console.log('Current events:', events);
-    if (events.length > 0) {
-      console.log('First event date:', new Date(events[0].date));
-      console.log('Current date:', new Date());
-    }
-  }, [events]);
 
   const eventTypes = [
     { value: "general", label: "General" },
@@ -84,7 +77,6 @@ const Calendar = () => {
       }
     } catch (error) {
       toast.error(error.message || "Failed to add event");
-      console.error("Error adding event:", error);
     }
   };
 
@@ -113,7 +105,6 @@ const Calendar = () => {
       }
     } catch (error) {
       toast.error(error.message || "Failed to update event");
-      console.error("Error updating event:", error);
     }
   };
 
@@ -130,7 +121,6 @@ const Calendar = () => {
       }
     } catch (error) {
       toast.error(error.message || "Failed to delete event");
-      console.error("Error deleting event:", error);
     }
   };
 
@@ -166,28 +156,43 @@ const Calendar = () => {
 
   return (
     <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Church Calendar</h1>
+      <div className="flex justify-between items-center mb-8">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            onClick={() => navigate("/admin/dashboard")}
+            className="border-gray-200 hover:bg-gray-50"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+              Church Calendar
+            </h1>
+            <p className="text-gray-600 mt-1">Manage and schedule church events</p>
+          </div>
+        </div>
         <Button
           onClick={() => setIsAddEventOpen(true)}
-          className="bg-indigo-600 hover:bg-indigo-700"
+          className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90 transition-all duration-200"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add Event
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Monthly View</CardTitle>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <Card className="lg:col-span-2 border-none shadow-lg bg-white/50 backdrop-blur-sm">
+          <CardHeader className="border-b pb-4">
+            <CardTitle className="text-xl font-semibold text-gray-800">Monthly View</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <CalendarComponent
               mode="single"
               selected={date}
               onSelect={setDate}
-              className="rounded-md border"
+              className="rounded-md"
               modifiers={{
                 event: (date) =>
                   events.some(
@@ -199,23 +204,45 @@ const Calendar = () => {
                 event: {
                   backgroundColor: "rgb(79 70 229 / 0.1)",
                   color: "rgb(79 70 229)",
+                  fontWeight: "600",
                 },
+              }}
+              classNames={{
+                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
+                month: "space-y-4",
+                caption: "flex justify-center pt-1 relative items-center",
+                caption_label: "text-sm font-medium",
+                nav: "space-x-1 flex items-center",
+                nav_button: "h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100",
+                nav_button_previous: "absolute left-1",
+                nav_button_next: "absolute right-1",
+                table: "w-full border-collapse space-y-1",
+                head_row: "flex",
+                head_cell: "text-gray-500 rounded-md w-9 font-normal text-[0.8rem]",
+                row: "flex w-full mt-2",
+                cell: "text-center text-sm p-0 relative [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-l-md last:[&:has([aria-selected])]:rounded-r-md focus-within:relative focus-within:z-20",
+                day: "h-9 w-9 p-0 font-normal aria-selected:opacity-100",
+                day_selected: "bg-indigo-600 text-white hover:bg-indigo-600 hover:text-white focus:bg-indigo-600 focus:text-white",
+                day_today: "bg-accent text-accent-foreground",
+                day_outside: "text-gray-400 opacity-50",
+                day_disabled: "text-gray-400 opacity-50",
+                day_range_middle: "aria-selected:bg-accent aria-selected:text-accent-foreground",
+                day_hidden: "invisible",
               }}
             />
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Upcoming Events</CardTitle>
+        <Card className="border-none shadow-lg bg-white/50 backdrop-blur-sm">
+          <CardHeader className="border-b pb-4">
+            <CardTitle className="text-xl font-semibold text-gray-800">Upcoming Events</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="space-y-4">
               {events
                 .filter((event) => {
                   const eventDate = new Date(event.date);
                   const today = new Date();
-                  // Reset time components for accurate date comparison
                   eventDate.setHours(0, 0, 0, 0);
                   today.setHours(0, 0, 0, 0);
                   return eventDate >= today;
@@ -225,18 +252,18 @@ const Calendar = () => {
                 .map((event) => (
                   <div
                     key={event._id}
-                    className="p-4 rounded-lg border hover:shadow-md transition-shadow cursor-pointer"
+                    className="p-4 rounded-xl border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer bg-white/50 backdrop-blur-sm"
                     onClick={() => openEditDialog(event)}
                   >
                     <div className="flex items-start justify-between">
                       <div>
-                        <h3 className="font-medium text-gray-900">{event.title}</h3>
-                        <p className="text-sm text-gray-500">
+                        <h3 className="font-semibold text-gray-900">{event.title}</h3>
+                        <p className="text-sm text-gray-500 mt-1">
                           {format(new Date(event.date), "MMM dd, yyyy")} at {event.time}
                         </p>
                       </div>
                       <span
-                        className={`px-2 py-1 rounded-full text-xs font-medium ${getEventTypeColor(
+                        className={`px-3 py-1 rounded-full text-xs font-medium ${getEventTypeColor(
                           event.type
                         )}`}
                       >
@@ -244,7 +271,7 @@ const Calendar = () => {
                       </span>
                     </div>
                     {event.description && (
-                      <p className="mt-2 text-sm text-gray-600">{event.description}</p>
+                      <p className="mt-2 text-sm text-gray-600 line-clamp-2">{event.description}</p>
                     )}
                   </div>
                 ))}
@@ -255,24 +282,25 @@ const Calendar = () => {
 
       {/* Add Event Dialog */}
       <Dialog open={isAddEventOpen} onOpenChange={setIsAddEventOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Add New Event</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-gray-800">Add New Event</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">Event Title</Label>
+              <Label htmlFor="title" className="text-sm font-medium text-gray-700">Event Title</Label>
               <Input
                 id="title"
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
                 placeholder="Enter event title"
+                className="border-gray-200 focus:border-indigo-500"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="type">Event Type</Label>
+              <Label htmlFor="type" className="text-sm font-medium text-gray-700">Event Type</Label>
               <Select value={eventType} onValueChange={setEventType}>
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-200 focus:border-indigo-500">
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -285,30 +313,33 @@ const Calendar = () => {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="date">Date</Label>
+              <Label htmlFor="date" className="text-sm font-medium text-gray-700">Date</Label>
               <Input
                 id="date"
                 type="date"
                 value={format(eventDate, "yyyy-MM-dd")}
                 onChange={(e) => setEventDate(new Date(e.target.value))}
+                className="border-gray-200 focus:border-indigo-500"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="time">Time</Label>
+              <Label htmlFor="time" className="text-sm font-medium text-gray-700">Time</Label>
               <Input
                 id="time"
                 type="time"
                 value={eventTime}
                 onChange={(e) => setEventTime(e.target.value)}
+                className="border-gray-200 focus:border-indigo-500"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description" className="text-sm font-medium text-gray-700">Description</Label>
               <Textarea
                 id="description"
                 value={eventDescription}
                 onChange={(e) => setEventDescription(e.target.value)}
                 placeholder="Enter event description"
+                className="border-gray-200 focus:border-indigo-500 min-h-[100px]"
               />
             </div>
           </div>
@@ -319,10 +350,15 @@ const Calendar = () => {
                 setIsAddEventOpen(false);
                 resetForm();
               }}
+              className="border-gray-200 hover:bg-gray-50"
             >
               Cancel
             </Button>
-            <Button onClick={handleAddEvent} disabled={loading}>
+            <Button 
+              onClick={handleAddEvent} 
+              disabled={loading}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90"
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -338,24 +374,25 @@ const Calendar = () => {
 
       {/* Edit Event Dialog */}
       <Dialog open={isEditEventOpen} onOpenChange={setIsEditEventOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Edit Event</DialogTitle>
+            <DialogTitle className="text-xl font-semibold text-gray-800">Edit Event</DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="edit-title">Event Title</Label>
+              <Label htmlFor="edit-title" className="text-sm font-medium text-gray-700">Event Title</Label>
               <Input
                 id="edit-title"
                 value={eventTitle}
                 onChange={(e) => setEventTitle(e.target.value)}
                 placeholder="Enter event title"
+                className="border-gray-200 focus:border-indigo-500"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-type">Event Type</Label>
+              <Label htmlFor="edit-type" className="text-sm font-medium text-gray-700">Event Type</Label>
               <Select value={eventType} onValueChange={setEventType}>
-                <SelectTrigger>
+                <SelectTrigger className="border-gray-200 focus:border-indigo-500">
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
                 <SelectContent>
@@ -368,30 +405,33 @@ const Calendar = () => {
               </Select>
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-date">Date</Label>
+              <Label htmlFor="edit-date" className="text-sm font-medium text-gray-700">Date</Label>
               <Input
                 id="edit-date"
                 type="date"
                 value={format(eventDate, "yyyy-MM-dd")}
                 onChange={(e) => setEventDate(new Date(e.target.value))}
+                className="border-gray-200 focus:border-indigo-500"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-time">Time</Label>
+              <Label htmlFor="edit-time" className="text-sm font-medium text-gray-700">Time</Label>
               <Input
                 id="edit-time"
                 type="time"
                 value={eventTime}
                 onChange={(e) => setEventTime(e.target.value)}
+                className="border-gray-200 focus:border-indigo-500"
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="edit-description">Description</Label>
+              <Label htmlFor="edit-description" className="text-sm font-medium text-gray-700">Description</Label>
               <Textarea
                 id="edit-description"
                 value={eventDescription}
                 onChange={(e) => setEventDescription(e.target.value)}
                 placeholder="Enter event description"
+                className="border-gray-200 focus:border-indigo-500 min-h-[100px]"
               />
             </div>
           </div>
@@ -402,6 +442,7 @@ const Calendar = () => {
                 setIsEditEventOpen(false);
                 resetForm();
               }}
+              className="border-gray-200 hover:bg-gray-50"
             >
               Cancel
             </Button>
@@ -413,10 +454,15 @@ const Calendar = () => {
                   setIsEditEventOpen(false);
                 }
               }}
+              className="bg-red-600 hover:bg-red-700"
             >
               Delete
             </Button>
-            <Button onClick={handleEditEvent} disabled={loading}>
+            <Button 
+              onClick={handleEditEvent} 
+              disabled={loading}
+              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:opacity-90"
+            >
               {loading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

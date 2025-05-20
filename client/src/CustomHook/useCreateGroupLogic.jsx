@@ -27,6 +27,7 @@ export const useCreateGroupLogic = () => {
   const [selectedFileName, setSelectedFileName] = useState(null);
   const [isDeletingImage, setIsDeletingImage] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const dispatch = useDispatch();
   const { groupNames, groupLoading } = useSelector((state) => state.group);
@@ -37,6 +38,7 @@ export const useCreateGroupLogic = () => {
     setImageUrl(null);
     setPublicId(null);
     setSelectedFileName(null);
+    setIsUploading(false);
 
     sessionStorage.removeItem("tempGroupImagePublicId");
     sessionStorage.removeItem("tempGroupImageUrl");
@@ -111,14 +113,19 @@ export const useCreateGroupLogic = () => {
     try {
       setIsDeletingImage(true);
       const response = await dispatch(deleteGroupImage(publicId));
+
       if (response?.payload?.success) {
         toast.success(response.payload.message || "Image deleted successfully");
         resetImageState();
       } else {
-        toast.error(response.payload?.message || "Failed to delete image");
+        const errorMessage = response?.payload?.message || response?.error?.message || "Failed to delete image";
+        console.error("Image deletion failed:", errorMessage);
+        toast.error(errorMessage);
       }
     } catch (error) {
-      toast.error("An error occurred while deleting the image");
+      console.error("Image deletion error:", error);
+      const errorMessage = error?.response?.data?.message || error?.message || "An error occurred while deleting the image";
+      toast.error(errorMessage);
     } finally {
       setIsDeletingImage(false);
     }
@@ -161,6 +168,7 @@ export const useCreateGroupLogic = () => {
 
     const uploadImage = async () => {
       try {
+        setIsUploading(true);
         const imageFormData = new FormData();
         imageFormData.append("image", file);
 
@@ -178,6 +186,8 @@ export const useCreateGroupLogic = () => {
         console.error("Error uploading image:", error);
         toast.error("An error occurred while uploading the image");
         resetImageState();
+      } finally {
+        setIsUploading(false);
       }
     };
 
@@ -202,5 +212,6 @@ export const useCreateGroupLogic = () => {
     groupLoading,
     familyLoading,
     isFormSubmitted,
+    isUploading,
   };
 };

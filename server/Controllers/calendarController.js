@@ -2,20 +2,29 @@ import Calendar from "../models/calendarModel.js";
 
 // @desc    Get all calendar events
 // @route   GET /church/calendar/events
-// @access  Private
+// @access  Public
 export const getEvents = async (req, res) => {
   try {
+    console.log('Fetching events from database...');
     const events = await Calendar.find().sort({ date: 1 });
-    console.log('Fetched events:', events.map(event => ({
+    
+    console.log('Found events:', events.length);
+    console.log('Events data:', events.map(event => ({
       id: event._id,
       title: event.title,
       date: event.date,
-      time: event.time
+      time: event.time,
+      type: event.type
     })));
+
     res.json({ success: true, events });
   } catch (error) {
-    console.error('Error fetching events:', error);
-    res.status(500).json({ success: false, message: error.message });
+    console.error('Error in getEvents controller:', error);
+    res.status(500).json({ 
+      success: false, 
+      message: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 };
 
