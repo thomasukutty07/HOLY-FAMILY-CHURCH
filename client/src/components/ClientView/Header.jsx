@@ -126,17 +126,18 @@ const ClientHeader = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Drawer open={open} onOpenChange={setOpen}>
+            <Drawer open={open} onOpenChange={setOpen} direction="right">
               <DrawerTrigger asChild>
-                <button
-                  className="text-gray-300 hover:text-white transition-colors"
-                  onClick={() => setOpen(true)}
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="text-white hover:text-indigo-400 hover:bg-white/10"
                 >
                   <Menu className="h-6 w-6" />
-                </button>
+                </Button>
               </DrawerTrigger>
-              <DrawerContent className="bg-gray-900 text-white">
-                <div className="p-6">
+              <DrawerContent className="bg-black/95 backdrop-blur-lg border-l border-white/10">
+                <div className="p-6 h-full flex flex-col">
                   <div className="flex items-center justify-between mb-8">
                     <button
                       onClick={() => {
@@ -152,27 +153,30 @@ const ClientHeader = () => {
                         Holy Family
                       </span>
                     </button>
-                    <button
-                      className="text-gray-300 hover:text-white transition-colors"
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
                       onClick={() => setOpen(false)}
+                      className="text-white hover:text-indigo-400 hover:bg-white/10"
                     >
                       <X className="h-6 w-6" />
-                    </button>
+                    </Button>
                   </div>
-                  <nav className="space-y-6">
+                  
+                  <nav className="space-y-6 flex-1">
                     {headerItems.map((item) => (
                       <div key={item.title} className="group">
                         {item.path === "home" ? (
                           <button
                             onClick={() => handleNavigate(item.path)}
-                            className="block text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer w-full text-left"
+                            className="block text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer w-full text-left py-2"
                           >
                             {item.title}
                           </button>
                         ) : item.path === "events" ? (
                           <button
                             onClick={() => handleNavigate(item.path)}
-                            className="block text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer w-full text-left"
+                            className="block text-gray-300 hover:text-white transition-colors text-lg bg-transparent border-none outline-none cursor-pointer w-full text-left py-2"
                           >
                             {item.title}
                           </button>
@@ -184,7 +188,7 @@ const ClientHeader = () => {
                             smooth={true}
                             duration={300}
                             offset={item.offset}
-                            className="block text-gray-300 hover:text-white transition-colors text-lg cursor-pointer w-full text-left"
+                            className="block text-gray-300 hover:text-white transition-colors text-lg cursor-pointer w-full text-left py-2"
                           >
                             {item.title}
                           </ScrollLink>
@@ -192,17 +196,20 @@ const ClientHeader = () => {
                         <div className="h-px w-0 bg-gradient-to-r from-indigo-400 to-purple-400 group-hover:w-full transition-all duration-300 mt-1"></div>
                       </div>
                     ))}
+                  </nav>
+
+                  <div className="pt-6 border-t border-white/10">
                     <Button
                       onClick={() => {
                         setOpen(false);
                         navigate("/auth/login");
                       }}
-                      className="w-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                      className="w-full bg-gradient-to-r from-indigo-500 to-purple-500 hover:from-indigo-600 hover:to-purple-600 text-white transition-all duration-300"
                     >
                       <LogIn className="h-4 w-4 mr-2" />
                       Admin Login
                     </Button>
-                  </nav>
+                  </div>
                 </div>
               </DrawerContent>
             </Drawer>

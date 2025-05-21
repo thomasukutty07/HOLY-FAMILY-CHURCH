@@ -1,12 +1,30 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-const initialState = {
-    isAuthenticated: false,
-    user: null,
-    loading: false,
-    error: null
+// Load initial state from localStorage
+const loadInitialState = () => {
+    try {
+        const persistedState = localStorage.getItem('authState');
+        if (persistedState) {
+            const parsedState = JSON.parse(persistedState);
+            return {
+                ...parsedState,
+                loading: false,
+                error: null
+            };
+        }
+    } catch (error) {
+        console.error('Error loading persisted auth state:', error);
+    }
+    return {
+        isAuthenticated: false,
+        user: null,
+        loading: false,
+        error: null
+    };
 };
+
+const initialState = loadInitialState();
 
 const API_BASE_URL = "http://localhost:4000/church/auth";
 
@@ -48,7 +66,7 @@ export const logoutUser = createAsyncThunk(
     async (_, thunkAPI) => {
         try {
             // Clear client-side storage first
-            localStorage.clear();
+            localStorage.removeItem('authState');
             sessionStorage.clear();
             
             // Make the logout request with credentials
@@ -72,7 +90,7 @@ export const logoutUser = createAsyncThunk(
             return response.data;
         } catch (error) {
             // Even if the request fails, clear client state
-            localStorage.clear();
+            localStorage.removeItem('authState');
             sessionStorage.clear();
             document.cookie.split(";").forEach(cookie => {
                 const [name] = cookie.split("=");
@@ -108,6 +126,16 @@ const authSlice = createSlice({
             state.isAuthenticated = action.payload?.success || false;
             state.user = action.payload?.user || null;
             state.error = null;
+            
+            // Persist state to localStorage
+            if (action.payload?.success && action.payload?.user) {
+                localStorage.setItem('authState', JSON.stringify({
+                    isAuthenticated: true,
+                    user: action.payload.user
+                }));
+            } else {
+                localStorage.removeItem('authState');
+            }
         };
 
         const handleRejected = (state, action) => {
@@ -115,6 +143,7 @@ const authSlice = createSlice({
             state.isAuthenticated = false;
             state.user = null;
             state.error = action.payload?.message || "An error occurred";
+            localStorage.removeItem('authState');
         };
 
         builder
@@ -130,12 +159,14 @@ const authSlice = createSlice({
                 state.isAuthenticated = false;
                 state.user = null;
                 state.error = null;
+                localStorage.removeItem('authState');
             })
             .addCase(logoutUser.rejected, (state) => {
                 state.loading = false;
                 state.isAuthenticated = false;
                 state.user = null;
                 state.error = null;
+                localStorage.removeItem('authState');
             });
     },
 });

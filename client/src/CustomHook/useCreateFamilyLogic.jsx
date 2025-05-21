@@ -94,50 +94,30 @@ export const useCreateFamilyLogic = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    let updatedFormData = {
-      ...formData,
-      imageUrl: imageUrl || "",
-      publicId: publicId || "",
-    };
-
-    const allFieldsFilled = Object.keys(updatedFormData).every((key) => {
-      // Skip image fields checking if they're optional
-      if (key === "imageUrl" || key === "publicId") return true;
-
-      const value = updatedFormData[key];
-      return (
-        value !== null && value !== undefined && String(value).trim() !== ""
-      );
-    });
-
-    if (!allFieldsFilled) {
-      return toast.error("Please fill out all the fields.");
-    }
-
     setIsSubmitting(true);
 
     try {
-      const formToSubmit = new FormData();
-      Object.entries(updatedFormData).forEach(([key, value]) =>
-        formToSubmit.append(key, value)
-      );
+      // Validate required fields
+      const requiredFields = ['familyName', 'group', 'contactNo', 'address', 'location', 'headOfFamily'];
+      const missingFields = requiredFields.filter(field => !formData[field]);
+      
+      if (missingFields.length > 0) {
+        toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
+        setIsSubmitting(false);
+        return;
+      }
 
-      const response = await dispatch(createFamily(formToSubmit));
-
-      if (response?.payload?.success) {
-        toast.success(response.payload.message || "Family added successfully");
+      const response = await dispatch(createFamily(formData)).unwrap();
+      
+      if (response.success) {
+        toast.success("Family created successfully");
         resetForm();
+        setFormKey(prev => prev + 1);
         dispatch(fetchAllFamily());
-      } else {
-        const errorMsg =
-          response.payload?.message ||
-          response.error?.message ||
-          "Failed to add family";
-        toast.error(errorMsg);
       }
     } catch (error) {
-      console.error("Form submission error:", error);
-      toast.error("An error occurred while adding the family");
+      console.error("Create family error:", error);
+      toast.error(error.message || "Failed to create family");
     } finally {
       setIsSubmitting(false);
     }

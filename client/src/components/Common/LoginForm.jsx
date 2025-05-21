@@ -68,40 +68,35 @@ const LoginForm = () => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-8 relative">
+    <div className="w-full flex flex-col gap-6 relative pt-8">
       {/* Back Button */}
       <button
         onClick={() => navigate("/church/home")}
-        className="absolute -top-12 left-0 flex items-center gap-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200"
+        className="absolute top-0 left-0 flex items-center gap-2 text-gray-600 hover:text-indigo-600 transition-colors duration-200 text-sm"
       >
         <ArrowLeft className="w-5 h-5" />
         <span>Back to Home</span>
       </button>
 
-      {/* Animated Background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-purple-50 opacity-50 -z-10">
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] opacity-20"></div>
-      </div>
-      
       {/* Logo and Welcome Section */}
-      <div className="text-center space-y-4">
+      <div className="text-center space-y-3 mt-6">
         <div className="flex justify-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center transform rotate-3 hover:rotate-0 transition-all duration-300 shadow-lg">
-            <Church className="w-10 h-10 text-white" />
+          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center transform rotate-3 hover:rotate-0 transition-all duration-300 shadow-lg">
+            <Church className="w-8 h-8 text-white" />
           </div>
         </div>
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
             Welcome Back
           </h1>
-          <p className="text-gray-600 mt-2">
+          <p className="text-gray-600 mt-1 text-sm">
             Sign in to access your admin dashboard
           </p>
         </div>
       </div>
       
-      <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-        <div className="space-y-2">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="space-y-1">
           <label htmlFor="email" className="text-sm font-medium text-gray-700">
             Email Address
           </label>
@@ -116,7 +111,7 @@ const LoginForm = () => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter your email"
-              className={`w-full pl-10 pr-4 py-3 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
+              className={`w-full pl-10 pr-4 py-2.5 border ${errors.email ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
               required
             />
             {errors.email && (
@@ -125,7 +120,7 @@ const LoginForm = () => {
           </div>
         </div>
         
-        <div className="space-y-2">
+        <div className="space-y-1">
           <label htmlFor="password" className="text-sm font-medium text-gray-700">
             Password
           </label>
@@ -140,7 +135,7 @@ const LoginForm = () => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              className={`w-full pl-10 pr-12 py-3 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
+              className={`w-full pl-10 pr-10 py-2.5 border ${errors.password ? 'border-red-300' : 'border-gray-300'} rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm bg-white/80 backdrop-blur-sm transition-all duration-200 shadow-sm`}
               required
             />
             <button
@@ -169,7 +164,7 @@ const LoginForm = () => {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-3 px-4 rounded-xl hover:opacity-90 transition-all duration-200 flex justify-center items-center text-sm font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-2.5 px-4 rounded-xl hover:opacity-90 transition-all duration-200 flex justify-center items-center text-sm font-medium shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
         >
           {isLoading ? (
             <span className="flex items-center">

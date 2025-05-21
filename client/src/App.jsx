@@ -54,25 +54,41 @@ const App = () => {
   const handleAuthCheck = useCallback(async () => {
     try {
       const data = await dispatch(checkAuth());
-      if (data?.payload?.success && !isAuthenticated) {
-        if (window.location.pathname.startsWith('/admin')) {
+      const isAdminRoute = window.location.pathname.startsWith('/admin');
+      const isAuthRoute = window.location.pathname.startsWith('/auth');
+
+      if (data?.payload?.success && data?.payload?.user) {
+        // User is authenticated
+        if (isAuthRoute) {
+          // If on auth route (like login), redirect to admin dashboard
           navigate("/admin/dashboard");
         }
-      } else if (!data?.payload?.success && isAuthenticated) {
-        if (window.location.pathname.startsWith('/admin')) {
+      } else {
+        // User is not authenticated
+        if (isAdminRoute) {
+          // If on admin route but not authenticated, redirect to login
           navigate("/auth/login");
         }
       }
     } catch (error) {
       console.error("Auth check failed:", error);
+      // If there's an error and we're on an admin route, redirect to login
       if (window.location.pathname.startsWith('/admin')) {
         navigate("/auth/login");
       }
     }
-  }, [dispatch, navigate, isAuthenticated]);
+  }, [dispatch, navigate]);
 
   useEffect(() => {
+    // Check authentication on initial load
     handleAuthCheck();
+
+    // Set up an interval to periodically check authentication
+    const authCheckInterval = setInterval(handleAuthCheck, 5 * 60 * 1000); // Check every 5 minutes
+
+    return () => {
+      clearInterval(authCheckInterval);
+    };
   }, [handleAuthCheck]);
 
   const renderRoutes = useCallback(() => (
@@ -82,9 +98,9 @@ const App = () => {
         <Route index element={<HomeLayout />} />
         <Route path="home" element={<HomeLayout />}>
           <Route index element={<ClientHome />} />
-          <Route path="leaders" element={<Leaders />} />
           <Route path="birthdays" element={<BirthdaysPage />} />
         </Route>
+        <Route path="leaders" element={<Leaders />} />
         <Route path="about" element={<AboutAndHistory />} />
         <Route path="role-details" element={<RoleDetails />} />
       </Route>

@@ -30,18 +30,21 @@ export const uploadFamilyImage = async (req, res) => {
 };
 export const createFamily = async (req, res) => {
     try {
-        const { familyName, group, imageUrl, publicId, contactNo, address, location, headOfFamily } = req.body
+        const { familyName, group, imageUrl, publicId, contactNo, address, location, headOfFamily } = req.body;
+
         const newFamily = new Family({
             familyName, group, imageUrl, publicId, contactNo, address, headOfFamily, location
-        })
+        });
+        
         if (!newFamily) {
-            return res.status(401).json({ success: false, message: "Family creation failed" })
+            return res.status(401).json({ success: false, message: "Family creation failed" });
         }
-        await newFamily.save()
-
-        return res.status(201).json({ success: true, message: "Family created", newFamily })
+        
+        await newFamily.save();
+        return res.status(201).json({ success: true, message: "Family created", newFamily });
     } catch (error) {
-        return res.status(500).json({ success: false, message: "Failed to create family" })
+        console.error("Create family error:", error);
+        return res.status(500).json({ success: false, message: "Failed to create family" });
     }
 }
 export const updateFamily = async (req, res) => {
@@ -96,7 +99,8 @@ export const fetchAllFamily = async (req, res) => {
                 const memberCount = await Member.countDocuments({ family: family._id });
                 return {
                     ...family.toObject(),
-                    totalMembers: memberCount
+                    totalMembers: memberCount,
+                    displayName: `${family.familyName} (${family.headOfFamily})`
                 };
             })
         );

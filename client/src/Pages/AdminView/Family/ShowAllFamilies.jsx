@@ -130,6 +130,7 @@ const ShowAllFamilies = () => {
       const term = searchTerm.toLowerCase();
       result = result.filter(family => 
         family.familyName.toLowerCase().includes(term) ||
+        family.headOfFamily.toLowerCase().includes(term) ||
         family.location.toLowerCase().includes(term)
       );
     }
@@ -176,6 +177,7 @@ const ShowAllFamilies = () => {
   const exportToCsv = useCallback(() => {
     const headers = [
       "Family Name",
+      "Head of Family",
       "Location",
       "Members",
       "Created Date",
@@ -184,6 +186,7 @@ const ShowAllFamilies = () => {
 
     const csvData = filteredAndSortedFamilies.map((family) => [
       family.familyName,
+      family.headOfFamily,
       family.location,
       familyMembers[family._id]?.length || 0,
       formatDate(family.createdAt),
@@ -228,7 +231,7 @@ const ShowAllFamilies = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-60" />
           <div className="absolute bottom-0 left-0 p-4 w-full">
             <h2 className="text-xl font-bold text-white">
-              {family.familyName}
+              {family.displayName || family.familyName}
             </h2>
           </div>
         </div>
