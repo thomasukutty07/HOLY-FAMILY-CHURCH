@@ -1,16 +1,18 @@
-import { headerItems } from "@/config";
+import { getHeaderItems } from "@/config";
 import React, { useState, useEffect } from "react";
 import { Link as ScrollLink, scroller } from "react-scroll";
 import { Menu, X, ChevronDown, Church, LogIn } from "lucide-react";
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Button } from "../ui/button";
 import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const ClientHeader = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const headerItems = getHeaderItems();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -58,28 +60,22 @@ const ClientHeader = () => {
   };
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled 
-          ? "bg-black/90 backdrop-blur-xl py-3 shadow-lg" 
-          : "bg-transparent py-6"
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled ? "bg-gray-900/95 backdrop-blur-sm" : "bg-transparent"
       }`}
     >
-      <div className="container mx-auto px-6">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-24">
           {/* Logo */}
           <button
-            onClick={() => handleNavigate("home")}
-            className="group flex items-center gap-3"
+            onClick={() => handleNavigate("/church/home")}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center transform transition-transform duration-300 group-hover:rotate-3 ${
-              scrolled ? 'scale-90' : 'scale-100'
-            }`}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
               <Church className="w-6 h-6 text-white" />
             </div>
-            <span className={`font-compacta text-2xl bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent transition-all duration-300 ${
-              scrolled ? 'text-xl' : 'text-2xl'
-            }`}>
+            <span className="font-compacta text-2xl bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
               Holy Family
             </span>
           </button>
@@ -130,35 +126,39 @@ const ClientHeader = () => {
 
           {/* Mobile Menu Button */}
           <div className="md:hidden">
-            <Drawer open={open} onOpenChange={setOpen} direction="right">
+            <Drawer open={open} onOpenChange={setOpen}>
               <DrawerTrigger asChild>
-                <Button 
-                  variant="ghost" 
-                  size="icon"
-                  className="text-white hover:text-indigo-400 hover:bg-white/10"
+                <button
+                  className="text-gray-300 hover:text-white transition-colors"
+                  onClick={() => setOpen(true)}
                 >
                   <Menu className="h-6 w-6" />
-                </Button>
+                </button>
               </DrawerTrigger>
-              <DrawerContent className="bg-black/95 backdrop-blur-xl border-l border-white/10">
+              <DrawerContent className="bg-gray-900 text-white">
                 <div className="p-6">
                   <div className="flex items-center justify-between mb-8">
-                    <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        setOpen(false);
+                        handleNavigate("/church/home");
+                      }}
+                      className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+                    >
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
                         <Church className="w-6 h-6 text-white" />
                       </div>
-                      <span className="font-compacta text-xl text-white">Menu</span>
-                    </div>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
+                      <span className="font-compacta text-2xl bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+                        Holy Family
+                      </span>
+                    </button>
+                    <button
+                      className="text-gray-300 hover:text-white transition-colors"
                       onClick={() => setOpen(false)}
-                      className="text-white hover:text-indigo-400 hover:bg-white/10"
                     >
                       <X className="h-6 w-6" />
-                    </Button>
+                    </button>
                   </div>
-                  
                   <nav className="space-y-6">
                     {headerItems.map((item) => (
                       <div key={item.title} className="group">
@@ -194,8 +194,8 @@ const ClientHeader = () => {
                     ))}
                     <Button
                       onClick={() => {
-                        navigate("/auth/login");
                         setOpen(false);
+                        navigate("/auth/login");
                       }}
                       className="w-full bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
                     >

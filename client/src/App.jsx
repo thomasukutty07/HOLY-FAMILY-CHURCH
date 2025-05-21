@@ -24,6 +24,8 @@ import ResetPassword from "./components/Common/ResetPassword";
 import CreateAdmin from "./Pages/AdminView/CreateAdmin";
 import RoleDetails from "./Pages/ClientView/RoleDetails";
 import AboutAndHistory from "./components/ClientView/AboutAndHistory";
+import ClientHome from "./components/ClientView/ClientHome";
+import BirthdaysPage from "./Pages/ClientView/Birthdays";
 
 // New component to check church access
 const CheckChurchAuth = ({ children, isAuthenticated, user }) => {
@@ -78,8 +80,11 @@ const App = () => {
       {/* Public Church Routes */}
       <Route path="/church" element={<ChurchLayout />}>
         <Route index element={<HomeLayout />} />
-        <Route path="home" element={<HomeLayout />} />
-        <Route path="leaders" element={<Leaders />} />
+        <Route path="home" element={<HomeLayout />}>
+          <Route index element={<ClientHome />} />
+          <Route path="leaders" element={<Leaders />} />
+          <Route path="birthdays" element={<BirthdaysPage />} />
+        </Route>
         <Route path="about" element={<AboutAndHistory />} />
         <Route path="role-details" element={<RoleDetails />} />
       </Route>
@@ -112,6 +117,9 @@ const App = () => {
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="reset-password" element={<ResetPassword />} />
       </Route>
+
+      {/* Root route */}
+      <Route path="/" element={<Navigate to="/church/home" replace />} />
 
       {/* Catch all route */}
       <Route path="*" element={<PageNotFound />} />

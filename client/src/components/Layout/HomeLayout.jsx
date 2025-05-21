@@ -9,8 +9,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchEvents } from "../../Store/Calendar/calendarSlice";
 import { format } from "date-fns";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
-import { Calendar, Loader2, ArrowUp } from "lucide-react";
+import { Calendar, Loader2, ArrowUp, Gift } from "lucide-react";
 import Thanks from "../ClientView/Thanks";
+import Birthdays from "../../Pages/ClientView/Birthdays";
 
 const HomeLayout = () => {
   const location = useLocation();
@@ -81,19 +82,75 @@ const HomeLayout = () => {
 
         {/* Main Content */}
         <div className="relative z-10">
+          {/* Home Section */}
           <Element name="home">
             <ClientHome />
           </Element>
+
+          {/* About Section */}
           <Element name="about">
             <div className="scroll-mt-24">
               <AboutAndHistory />
             </div>
           </Element>
-          <Element name="contact">
-            <Contact />
+
+          {/* Birthdays Section */}
+          <Element name="birthdays">
+            <div className="scroll-mt-24">
+              <div className="min-h-screen bg-[#0A0A0A] py-20 px-4 md:px-20">
+                <div className="max-w-6xl mx-auto">
+                  <div className="text-center mb-12">
+                    <h2 className="text-3xl font-semibold text-white mb-4">Birthday Celebrations</h2>
+                    <p className="text-gray-400 max-w-2xl mx-auto">
+                      Join us in celebrating the special days of our church members. 
+                      Let's share joy and blessings with those who make our community special.
+                    </p>
+                  </div>
+                  
+                  <div className="grid lg:grid-cols-2 gap-8">
+                    {/* Today's Birthdays */}
+                    <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+                      <CardHeader className="border-b border-white/10">
+                        <CardTitle className="text-white flex items-center gap-2 font-compacta text-2xl">
+                          <Gift className="h-6 w-6 text-pink-400" />
+                          Today's Celebrations
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-6">
+                        <Birthdays variant="today" />
+                      </CardContent>
+                    </Card>
+
+                    {/* Upcoming Birthdays */}
+                    <Card className="bg-white/5 backdrop-blur-sm border-white/10">
+                      <CardHeader className="border-b border-white/10">
+                        <CardTitle className="text-white flex items-center gap-2 font-compacta text-2xl">
+                          <Calendar className="h-6 w-6 text-indigo-400" />
+                          Upcoming Birthdays
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-6">
+                        <Birthdays variant="upcoming" />
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </div>
+            </div>
           </Element>
+
+          {/* Contact Section */}
+          <Element name="contact">
+            <div className="scroll-mt-24">
+              <Contact />
+            </div>
+          </Element>
+
+          {/* Thanks Section */}
           <Element name="thanks">
-            <Thanks />
+            <div className="scroll-mt-24">
+              <Thanks />
+            </div>
           </Element>
         </div>
 

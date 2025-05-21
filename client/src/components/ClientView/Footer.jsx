@@ -23,23 +23,31 @@ const Footer = () => {
           offset: -100,
         });
       }
-    } else if (path === "events") {
+    } else if (path === "birthdays") {
       if (location.pathname === "/church/home") {
-        scroller.scrollTo("events", {
+        scroller.scrollTo("birthdays", {
           duration: 300,
           smooth: true,
           offset: -100,
         });
       } else {
         navigate("/church/home");
-        scroller.scrollTo("events", {
+        scroller.scrollTo("birthdays", {
           duration: 300,
           smooth: true,
           offset: -100,
         });
       }
     } else {
-      navigate("/church/home", { state: { scrollTo: path } });
+      if (location.pathname === "/church/home") {
+        scroller.scrollTo(path, {
+          duration: 300,
+          smooth: true,
+          offset: -100,
+        });
+      } else {
+        navigate("/church/home", { state: { scrollTo: path } });
+      }
     }
   };
 
@@ -85,14 +93,6 @@ const Footer = () => {
               </li>
               <li>
                 <button
-                  onClick={() => handleNavigate("events")}
-                  className="text-gray-400 hover:text-white transition-colors duration-200"
-                >
-                  Events
-                </button>
-              </li>
-              <li>
-                <button
                   onClick={() => handleNavigate("birthdays")}
                   className="text-gray-400 hover:text-white transition-colors duration-200"
                 >
@@ -111,31 +111,30 @@ const Footer = () => {
           </div>
 
           {/* Contact Info */}
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">Contact Info</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start gap-3">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-white">Contact Us</h3>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
                 <MapPin className="w-5 h-5 text-indigo-400 mt-1" />
-                <span>
+                <span className="text-gray-400">
                   Kiliyarkandam<br />
                   Holy Family Church<br />
                   Idukki, Kerala 685604
                 </span>
-              </li>
-              <li className="flex items-center gap-3">
+              </div>
+              <div className="flex items-center gap-3">
                 <Phone className="w-5 h-5 text-indigo-400" />
-                <span>(123) 456-7890</span>
-              </li>
-              <li className="flex items-center gap-3">
+                <span className="text-gray-400">(555) 123-4567</span>
+              </div>
+              <div className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-indigo-400" />
-                <span>info@holyfamilychurch.org</span>
-              </li>
-            </ul>
+                <span className="text-gray-400">info@holyfamilychurch.org</span>
+              </div>
+            </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-gray-800 mt-12 pt-8 text-center">
+        <div className="mt-12 pt-8 border-t border-gray-800 text-center">
           <p className="text-gray-400">
             © {new Date().getFullYear()} Holy Family Church. All rights reserved.
           </p>

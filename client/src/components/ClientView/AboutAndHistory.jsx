@@ -62,8 +62,8 @@ const AboutAndHistory = () => {
           className="text-center mb-20 relative z-10"
         >
           <h2 className="text-sm font-medium text-indigo-400 mb-4">ABOUT US</h2>
-          <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
-            Welcome to Our Family
+          <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            Our Legacy of Faith
           </h1>
           <p className="max-w-2xl mx-auto mt-6 text-xl text-gray-400">
             Journey through time and discover how our church has grown and evolved,

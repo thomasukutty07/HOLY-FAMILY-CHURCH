@@ -84,9 +84,13 @@ const calendarSlice = createSlice({
       .addCase(fetchEvents.pending, handlePending)
       .addCase(fetchEvents.fulfilled, (state, action) => {
         handleFulfilled(state, action);
+        console.log('Fetched events in reducer:', action.payload?.events);
         state.events = action.payload?.events || [];
       })
-      .addCase(fetchEvents.rejected, handleRejected)
+      .addCase(fetchEvents.rejected, (state, action) => {
+        handleRejected(state, action);
+        console.error('Error fetching events:', action.payload);
+      })
 
       .addCase(addEvent.pending, handlePending)
       .addCase(addEvent.fulfilled, (state, action) => {

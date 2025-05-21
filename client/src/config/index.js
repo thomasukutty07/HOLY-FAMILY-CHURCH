@@ -4,37 +4,41 @@ import person3 from '../assets/person3.jpeg';
 import person4 from '../assets/person4.webp';
 import marpapa from '../assets/marpapa.jpg';
 import familyImage from '../assets/family.png'
+import { useSelector } from "react-redux";
 
 export const images = { holy_family, person2, person4, person3, marpapa, familyImage };
 
-export const headerItems = [
-  {
-    title: "Home",
-    path: "home",
-    offset: -100,
-  },
-  {
-    title: "About",
-    path: "about",
-    offset: -100,
-  },
-  {
-    title: "Birthdays",
-    path: "birthdays",
-    offset: -100,
-  },
-  {
-    title: "Contact",
-    path: "contact",
-    offset: -100,
-  },
-];
+export const getHeaderItems = () => {
+  const items = [
+    {
+      title: "Home",
+      path: "home",
+      offset: -100,
+    },
+    {
+      title: "About",
+      path: "about",
+      offset: -100,
+    },
+    {
+      title: "Birthdays",
+      path: "birthdays",
+      offset: -100,
+    },
+    {
+      title: "Contact",
+      path: "contact",
+      offset: -100,
+    }
+  ];
+
+  return items;
+};
 
 export const footerLinks = {
   quickLinks: [
     { title: "Home", path: "/church/home" },
     { title: "About", path: "/church/about" },
-    { title: "Events", path: "/church/events" },
     { title: "Contact", path: "/church/contact" },
   ],
   ministries: [
