@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles can be added below */
+
+:root {
+  --background: 0 0% 100%;
+  --foreground: 222.2 84% 4.9%;
+  --border: 220 13% 91%;
+  --ring: 215 20% 65%;
+  --font-compacta: "Compacta", sans-serif;
+  --font-benzin: "Benzin", sans-serif;
+  --font-europa: "Europa", sans-serif;
+  --font-corporates: "Corporates", sans-serif;
+  --radius: 0.625rem;
+}
+
+.dark {
+  --background: 222.2 84% 4.9%;
+  --foreground: 0 0% 100%;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Animation Utilities */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease-out;
+}
+
+/* Flip Card Styles */
+.flip-card {
+  perspective: 1000px;
+}
+
+.flip-inner {
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.flip-card:hover .flip-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-front,
+.flip-back {
+  backface-visibility: hidden;
+}
+
+.flip-back {
+  transform: rotateY(180deg);
+}
+
+@font-face {
+  font-family: "Compacta";
+  src: url("../src/fonts/CompactaBT-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Europa";
+  src: url("../src/fonts/EuropaGroteskSH-Bol.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Benzin";
+  src: url("../src/fonts/Benzin-ExtraBold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Corporates";
+  src: url("../src/fonts/CorporateS-ExtraBold.woff2");
+}
+
+/* Base Styles */
+* {
+  border-color: hsl(var(--border));
+  outline-color: hsl(var(--ring) / 0.5);
+}
+
+body {
+  @apply bg-background text-foreground;
+}
+
+.font-compacta {
+  font-family: var(--font-compacta);
+}
+
+.font-benzin {
+  font-family: var(--font-benzin);
+}
+
+.font-europa {
+  font-family: var(--font-europa);
+}
+
+.font-corporates {
+  font-family: var(--font-corporates);
+}
+
+/* Component Styles */
+.container {
+  @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+}
