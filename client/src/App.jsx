@@ -4,7 +4,7 @@ import HomeLayout from "./components/Layout/HomeLayout";
 import ChurchLayout from "./components/Layout/ChurchLayout";
 import Leaders from "./Pages/ClientView/Leaders";
 import AdminLayout from "./components/Layout/AdminLayout";
-import Dashboard from "./Pages/AdminView/Dashboard";
+import Dashboard from "./Pages/AdminView/DashBoard";
 import AddMember from "./Pages/AdminView/Member/AddMember";
 import CreateFamily from "./Pages/AdminView/Family/CreateFamily";
 import CheckAuth from "./CheckAuth";

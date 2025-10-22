@@ -12,8 +12,8 @@ export const apiLimiter = rateLimit({
 
 // Auth routes rate limiter (more strict)
 export const authLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5, // Limit each IP to 5 login attempts per hour
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // Limit each IP to 20 login attempts per 15 minutes
     message: 'Too many login attempts, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
@@ -26,4 +26,4 @@ export const uploadLimiter = rateLimit({
     message: 'Too many file uploads, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
-}); 
+});
