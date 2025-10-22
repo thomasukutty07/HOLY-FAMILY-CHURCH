@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { AUTH_API } from '../../config/api';
 
 // Load initial state from localStorage
 const loadInitialState = () => {
@@ -26,7 +27,7 @@ const loadInitialState = () => {
 
 const initialState = loadInitialState();
 
-const API_BASE_URL = "http://localhost:4000/church/auth";
+const API_BASE_URL = AUTH_API;
 
 const handleAsyncThunk = async (endpoint, method = "get", data = null, thunkAPI) => {
     try {

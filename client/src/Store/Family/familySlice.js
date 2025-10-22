@@ -1,10 +1,11 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
 import axios from "axios"
+import { FAMILIES_API } from '../../config/api'
 
 export const uploadFamilyImage = createAsyncThunk("family/upload-image", async (data, { rejectWithValue }) => {
     try {
         const response = await axios.post(
-            "http://localhost:4000/church/families/upload-image",
+            `${FAMILIES_API}/upload-image`,
             data,
             {
                 withCredentials: true,
@@ -19,7 +20,7 @@ export const uploadFamilyImage = createAsyncThunk("family/upload-image", async (
 
 export const updateFamily = createAsyncThunk("family/update", async ({ id, familyData }, { rejectWithValue }) => {
     try {
-        const response = await axios.put(`http://localhost:4000/church/families/update/${id}`, familyData, {
+        const response = await axios.put(`${FAMILIES_API}/update/${id}`, familyData, {
             headers: {
                 "Content-Type": "application/json"
             },
@@ -34,7 +35,7 @@ export const updateFamily = createAsyncThunk("family/update", async ({ id, famil
 
 export const createFamily = createAsyncThunk("family/create", async (data, { rejectWithValue }) => {
     try {
-        const response = await axios.post('http://localhost:4000/church/families/create-family', data, {
+        const response = await axios.post(`${FAMILIES_API}/create-family`, data, {
             headers: {
                 "Content-Type": "application/json"
             },
@@ -49,7 +50,7 @@ export const createFamily = createAsyncThunk("family/create", async (data, { rej
 
 export const fetchAllFamily = createAsyncThunk("All/families", async (_, { rejectWithValue }) => {
     try {
-        const response = await axios.get('http://localhost:4000/church/families', {
+        const response = await axios.get(FAMILIES_API, {
             withCredentials: true,
             headers: {
                 "Content-Type": "application/json"
@@ -63,7 +64,7 @@ export const fetchAllFamily = createAsyncThunk("All/families", async (_, { rejec
 
 export const fetchFamilyWithGroup = createAsyncThunk("group/familes", async (id, { rejectWithValue }) => {
     try {
-        const response = await axios.get(`http://localhost:4000/church/families/${id}/families`, {
+        const response = await axios.get(`${FAMILIES_API}/${id}/families`, {
             withCredentials: true,
             headers: {
                 "Content-Type": "application/json"
@@ -79,7 +80,7 @@ export const fetchFamilyWithGroup = createAsyncThunk("group/familes", async (id,
 export const deleteFamilyImage = createAsyncThunk("family/deleteFamilyImage", async (id, { rejectWithValue }) => {
     try {
         const imageId = id.replace(/^church\//, "");
-        const response = await axios.delete(`http://localhost:4000/church/families/delete-image/${imageId}`, {
+        const response = await axios.delete(`${FAMILIES_API}/delete-image/${imageId}`, {
             withCredentials: true,
             headers: {
                 "Content-Type": "application/json"
@@ -94,7 +95,7 @@ export const deleteFamilyImage = createAsyncThunk("family/deleteFamilyImage", as
 
 export const deleteFamily = createAsyncThunk("family/deleteFamily", async (id, { rejectWithValue }) => {
     try {
-        const response = await axios.delete(`http://localhost:4000/church/families/delete/${id}`, {
+        const response = await axios.delete(`${FAMILIES_API}/delete/${id}`, {
             withCredentials: true,
             headers: {
                 "Content-Type": "application/json"

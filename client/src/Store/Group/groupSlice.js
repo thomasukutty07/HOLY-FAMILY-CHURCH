@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
+import { GROUPS_API } from '../../config/api';
 
 const initialState = {
     groupNames: [],
@@ -17,7 +18,7 @@ export const createGroup = createAsyncThunk("group/create", async (data, { rejec
         });
 
         const response = await axios.post(
-            "http://localhost:4000/church/groups/create-group", 
+            `${GROUPS_API}/create-group`, 
             jsonData,
             {
                 withCredentials: true,
@@ -36,7 +37,7 @@ export const createGroup = createAsyncThunk("group/create", async (data, { rejec
 export const deleteGroup = createAsyncThunk("group/delete", async (id, { rejectWithValue }) => {
     try {
         const response = await axios.delete(
-            `http://localhost:4000/church/groups/delete/${id}`,
+            `${GROUPS_API}/delete/${id}`,
             {
                 withCredentials: true,
                 headers: {
@@ -55,7 +56,7 @@ export const deleteGroupImage = createAsyncThunk("group/delete-image", async (id
     try {
         const imageId = id.replace(/^church\//, "");
         const response = await axios.delete(
-            `http://localhost:4000/church/groups/delete-image/${imageId}`,
+            `${GROUPS_API}/delete-image/${imageId}`,
             {
                 withCredentials: true,
                 headers: {
@@ -73,7 +74,7 @@ export const deleteGroupImage = createAsyncThunk("group/delete-image", async (id
 export const uploadGroupImage = createAsyncThunk("group/upload-image", async (data, { rejectWithValue }) => {
     try {
         const response = await axios.post(
-            "http://localhost:4000/church/groups/upload-image", 
+            `${GROUPS_API}/upload-image`, 
             data,
             {
                 withCredentials: true,
@@ -89,7 +90,7 @@ export const uploadGroupImage = createAsyncThunk("group/upload-image", async (da
 export const fetchAllGroupNames = createAsyncThunk("group/fetchGroupsWithFamily", async (_, { rejectWithValue }) => {
     try {
         const response = await axios.get(
-            "http://localhost:4000/church/groups",
+            GROUPS_API,
             {
                 withCredentials: true,
                 headers: {
@@ -107,7 +108,7 @@ export const fetchAllGroupNames = createAsyncThunk("group/fetchGroupsWithFamily"
 export const updateGroup = createAsyncThunk("group/update", async ({ id, groupData }, { rejectWithValue }) => {
     try {
         const response = await axios.put(
-            `http://localhost:4000/church/groups/update/${id}`, 
+            `${GROUPS_API}/update/${id}`, 
             groupData, 
             {
                 withCredentials: true,

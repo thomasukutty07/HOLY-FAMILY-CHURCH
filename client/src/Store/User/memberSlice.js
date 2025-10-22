@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { MEMBERS_API } from '../../config/api';
 
 const initialState = {
     members: [],
@@ -15,7 +16,7 @@ export const uploadMemberImage = createAsyncThunk(
     async (data, { rejectWithValue }) => {
         try {
             const response = await axios.post(
-                "http://localhost:4000/church/members/upload-image",
+                `${MEMBERS_API}/upload-image`,
                 data,
                 {
                     withCredentials: true,
@@ -35,7 +36,7 @@ export const createMember = createAsyncThunk(
     async (formData, { rejectWithValue }) => {
         try {
             const response = await axios.post(
-                "http://localhost:4000/church/members/members",
+                `${MEMBERS_API}/members`,
                 formData,
                 {
                     withCredentials: true,
@@ -61,7 +62,7 @@ export const deleteMemberImage = createAsyncThunk(
             const imageId = id.replace(/^church\//, "");
             
             const response = await axios.delete(
-                `http://localhost:4000/church/members/delete-image/${imageId}`,
+                `${MEMBERS_API}/delete-image/${imageId}`,
                 {
                     withCredentials: true,
                     headers: {
@@ -88,7 +89,7 @@ export const fetchAllMembers = createAsyncThunk(
     async (_, { rejectWithValue }) => {
         try {
             const response = await axios.get(
-                "http://localhost:4000/church/members",
+                MEMBERS_API,
                 {
                     withCredentials: true,
                     headers: {
@@ -107,7 +108,7 @@ export const fetchFamilyWithMembers = createAsyncThunk(
     async (id, { rejectWithValue }) => {
         try {
             const response = await axios.get(
-                `http://localhost:4000/church/members/${id}/members`,
+                `${MEMBERS_API}/${id}/members`,
                 {
                     withCredentials: true,
                     headers: {
@@ -128,7 +129,7 @@ export const updateMember = createAsyncThunk(
     async (memberData, { rejectWithValue }) => {
         try {
             const response = await axios.put(
-                `http://localhost:4000/church/members/members/update/${memberData.id}`,
+                `${MEMBERS_API}/members/update/${memberData.id}`,
                 memberData,
                 {
                     headers: { "Content-Type": "application/json" },
@@ -150,7 +151,7 @@ export const deleteMember = createAsyncThunk(
     async (memberId, { rejectWithValue }) => {
         try {
             const response = await axios.delete(
-                `http://localhost:4000/church/members/members/${memberId}`,
+                `${MEMBERS_API}/members/${memberId}`,
                 {
                     withCredentials: true,
                     headers: {

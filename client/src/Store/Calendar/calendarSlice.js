@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
+import { CALENDAR_API } from '../../config/api';
 
 const initialState = {
   events: [],
@@ -7,7 +8,7 @@ const initialState = {
   error: null,
 };
 
-const API_BASE_URL = "http://localhost:4000/church/calendar";
+const API_BASE_URL = CALENDAR_API;
 
 const handleAsyncThunk = async (endpoint, method = "get", data = null, thunkAPI) => {
   try {
