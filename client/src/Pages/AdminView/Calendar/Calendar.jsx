@@ -140,14 +140,11 @@ const Calendar = () => {
 
   const handleConfirmDelete = async () => {
     if (!selectedEvent?._id) {
-      console.error("No event selected for deletion");
       return;
     }
 
     try {
-      console.log("Attempting to delete event:", selectedEvent._id);
       const result = await dispatch(deleteEvent(selectedEvent._id)).unwrap();
-      console.log("Delete result:", result);
       
       if (result?.success) {
         toast.success("Event deleted successfully");

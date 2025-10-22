@@ -17,7 +17,6 @@ const Leaders = () => {
   useEffect(() => {
     axios.get("http://localhost:4000/church/members/public-members")
       .then(res => {
-        console.log("Public members data:", res.data.members);
         setPublicMembers(res.data.members);
       })
       .catch(error => {

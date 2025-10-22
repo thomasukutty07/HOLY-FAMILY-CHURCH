@@ -34,7 +34,6 @@ export const createMember = createAsyncThunk(
     "admin/createMember",
     async (formData, { rejectWithValue }) => {
         try {
-            console.log("Creating member with data:", formData);
             const response = await axios.post(
                 "http://localhost:4000/church/members/members",
                 formData,
@@ -45,13 +44,11 @@ export const createMember = createAsyncThunk(
                     }
                 }
             );
-            console.log("Create member response:", response.data);
             if (!response.data.success) {
                 return rejectWithValue(response.data);
             }
             return response.data;
         } catch (error) {
-            console.error("Error while creating member:", error);
             return rejectWithValue(error.response?.data || { message: "Something went wrong" });
         }
     }
@@ -61,9 +58,7 @@ export const deleteMemberImage = createAsyncThunk(
     "admin/deleteMemberImage",
     async (id, { rejectWithValue }) => {
         try {
-            console.log("Attempting to delete image with id:", id);
             const imageId = id.replace(/^church\//, "");
-            console.log("Cleaned imageId:", imageId);
             
             const response = await axios.delete(
                 `http://localhost:4000/church/members/delete-image/${imageId}`,
@@ -74,16 +69,13 @@ export const deleteMemberImage = createAsyncThunk(
                     }
                 }
             );
-            console.log("Delete image response:", response.data);
             
             if (!response.data.success) {
-                console.error("Delete image failed:", response.data);
                 return rejectWithValue(response.data);
             }
             
             return response.data;
         } catch (error) {
-            console.error("Delete image error:", error);
             return rejectWithValue(
                 error.response?.data || { message: "Failed to delete image" }
             );
@@ -95,7 +87,6 @@ export const fetchAllMembers = createAsyncThunk(
     "admin/fetchAllMembers",
     async (_, { rejectWithValue }) => {
         try {
-            console.log("Fetching all members...");
             const response = await axios.get(
                 "http://localhost:4000/church/members",
                 {
@@ -105,10 +96,8 @@ export const fetchAllMembers = createAsyncThunk(
                     }
                 }
             );
-            console.log("Members response:", response.data);
             return response?.data;
         } catch (error) {
-            console.error("Error fetching members:", error);
             return rejectWithValue(error.response?.data || { message: "Failed to fetch members" });
         }
     }
@@ -138,7 +127,6 @@ export const updateMember = createAsyncThunk(
     "admin/updateMember",
     async (memberData, { rejectWithValue }) => {
         try {
-            console.log("Updating member with data:", memberData);
             const response = await axios.put(
                 `http://localhost:4000/church/members/members/update/${memberData.id}`,
                 memberData,
@@ -147,13 +135,11 @@ export const updateMember = createAsyncThunk(
                     withCredentials: true,
                 }
             );
-            console.log("Update member response:", response.data);
             if (!response.data.success) {
                 return rejectWithValue(response.data);
             }
             return response.data;
         } catch (error) {
-            console.error("Error while updating member:", error.message);
             return rejectWithValue(error.response?.data || { message: "Failed to update member" });
         }
     }

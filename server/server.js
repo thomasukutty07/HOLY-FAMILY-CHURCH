@@ -2,7 +2,6 @@ import express from 'express';
 import dotenv from 'dotenv';
 import { requestLogger, errorLogger, default as logger } from './Config/logger.js';
 import { connectDb } from './Database/db.js';
-import { connectRedis } from './Config/redis.js';
 import { apiLimiter, authLimiter } from './Config/rateLimit.js';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
@@ -23,11 +22,6 @@ const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 if (missingEnvVars.length > 0) {
     logger.error('Missing required environment variables:', missingEnvVars);
     process.exit(1);
-}
-
-// Optional Redis configuration
-if (!process.env.REDIS_URL) {
-    logger.warn('REDIS_URL not set. Running without Redis caching...');
 }
 
 const app = express();
@@ -65,7 +59,7 @@ app.use('/church', apiLimiter);
 app.get('/health', (req, res) => {
     res.status(200).json({ 
         status: 'healthy',
-        redis: process.env.REDIS_URL ? 'configured' : 'not configured'
+        redis: 'disabled'
     });
 });
 
@@ -90,11 +84,6 @@ app.use((err, req, res, next) => {
 async function startServer() {
     try {
         await connectDb();
-        const redis = await connectRedis();
-        
-        if (!redis) {
-            logger.warn('Redis connection failed. Running without caching...');
-        }
         
         app.listen(PORT, () => {
             logger.info(`Server running on port ${PORT}`);

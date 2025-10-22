@@ -134,7 +134,6 @@ export const useAddMemberLogic = () => {
 
       try {
         setIsFormSubmitted(true);
-        console.log("Submitting member data:", updatedFormData);
 
         const response = await dispatch(createMember(updatedFormData));
 

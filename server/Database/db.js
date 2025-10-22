@@ -6,8 +6,6 @@ const options = {
     minPoolSize: 5,
     socketTimeoutMS: 45000,
     family: 4,
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
     serverSelectionTimeoutMS: 5000,
     heartbeatFrequencyMS: 10000,
 };

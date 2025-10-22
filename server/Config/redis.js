@@ -41,49 +41,19 @@ if (process.env.REDIS_URL) {
     logger.info('Redis URL not configured. Running without Redis...');
 }
 
-export const connectRedis = async () => {
-    if (!redisClient) {
-        return null;
-    }
+// Redis is disabled
+logger.info('Redis is disabled in this configuration');
 
-    try {
-        await redisClient.connect();
-        return redisClient;
-    } catch (error) {
-        logger.error('Redis connection failed:', error);
-        return null;
-    }
+export const connectRedis = async () => {
+    logger.info('Redis connection skipped - Redis is disabled');
+    return null;
 };
 
 export const cacheMiddleware = (duration) => {
     return async (req, res, next) => {
-        if (!redisClient || !redisClient.isOpen || req.method !== 'GET') {
-            return next();
-        }
-
-        const key = `cache:${req.originalUrl}`;
-        try {
-            const cachedResponse = await redisClient.get(key);
-            if (cachedResponse) {
-                return res.json(JSON.parse(cachedResponse));
-            }
-        } catch (error) {
-            logger.error('Cache error:', error);
-        }
-
-        res.originalJson = res.json;
-        res.json = async (body) => {
-            if (redisClient && redisClient.isOpen) {
-                try {
-                    await redisClient.setEx(key, duration, JSON.stringify(body));
-                } catch (error) {
-                    logger.error('Cache set error:', error);
-                }
-            }
-            res.originalJson(body);
-        };
-        next();
+        // Skip caching when Redis is disabled
+        return next();
     };
 };
 
-export default redisClient; 
+export default null;

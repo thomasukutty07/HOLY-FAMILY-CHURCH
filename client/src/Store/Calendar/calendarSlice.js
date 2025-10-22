@@ -11,8 +11,6 @@ const API_BASE_URL = "http://localhost:4000/church/calendar";
 
 const handleAsyncThunk = async (endpoint, method = "get", data = null, thunkAPI) => {
   try {
-    console.log(`Making ${method.toUpperCase()} request to:`, `${API_BASE_URL}/${endpoint}`);
-    
     const config = {
       withCredentials: true,
       headers: {
@@ -24,18 +22,13 @@ const handleAsyncThunk = async (endpoint, method = "get", data = null, thunkAPI)
     if (method === "get") {
       response = await axios.get(`${API_BASE_URL}/${endpoint}`, config);
     } else if (method === "delete") {
-      console.log("Making delete request with config:", config);
       response = await axios.delete(`${API_BASE_URL}/${endpoint}`, config);
     } else {
       response = await axios[method](`${API_BASE_URL}/${endpoint}`, data, config);
     }
 
-    console.log(`${method.toUpperCase()} response:`, response?.data);
     return response?.data;
   } catch (error) {
-    console.error(`Error in ${method} request:`, error);
-    console.error("Error response:", error.response?.data);
-    console.error("Error status:", error.response?.status);
     return thunkAPI.rejectWithValue(error.response?.data || `${endpoint} failed`);
   }
 };
@@ -84,13 +77,9 @@ const calendarSlice = createSlice({
       .addCase(fetchEvents.pending, handlePending)
       .addCase(fetchEvents.fulfilled, (state, action) => {
         handleFulfilled(state, action);
-        console.log('Fetched events in reducer:', action.payload?.events);
         state.events = action.payload?.events || [];
       })
-      .addCase(fetchEvents.rejected, (state, action) => {
-        handleRejected(state, action);
-        console.error('Error fetching events:', action.payload);
-      })
+      .addCase(fetchEvents.rejected, handleRejected)
 
       .addCase(addEvent.pending, handlePending)
       .addCase(addEvent.fulfilled, (state, action) => {

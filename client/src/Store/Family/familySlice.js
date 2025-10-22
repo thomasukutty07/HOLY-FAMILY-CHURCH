@@ -49,17 +49,14 @@ export const createFamily = createAsyncThunk("family/create", async (data, { rej
 
 export const fetchAllFamily = createAsyncThunk("All/families", async (_, { rejectWithValue }) => {
     try {
-        console.log("Fetching all families...");
         const response = await axios.get('http://localhost:4000/church/families', {
             withCredentials: true,
             headers: {
                 "Content-Type": "application/json"
             }
         });
-        console.log("Family response:", response.data);
         return response?.data;
     } catch (error) {
-        console.error("Error fetching families:", error);
         return rejectWithValue(error.response?.data || { message: "Something went wrong" });
     }
 })
@@ -128,7 +125,6 @@ const familySlice = createSlice({
                 state.familyLoading = true;
             })
             .addCase(fetchAllFamily.fulfilled, (state, action) => {
-                console.log("Setting family names:", action.payload.families);
                 state.familyLoading = false;
                 state.familyNames = action.payload.families;
             })
